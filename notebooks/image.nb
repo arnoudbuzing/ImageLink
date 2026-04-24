@@ -10,17 +10,17 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       154,          7]
-NotebookDataLength[      3400,         95]
-NotebookOptionsPosition[      2309,         68]
-NotebookOutlinePosition[      2702,         84]
-CellTagsIndexPosition[      2659,         81]
+NotebookDataLength[      6203,        162]
+NotebookOptionsPosition[      4364,        122]
+NotebookOutlinePosition[      4755,        138]
+CellTagsIndexPosition[      4712,        135]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
 Cell[BoxData["Quit"], "Input",
  CellChangeTimes->{{3.986048553669571*^9, 3.986048554049961*^9}},
- CellLabel->"In[44]:=",ExpressionUUID->"453c4a73-c0c8-4587-9498-dbbc40b581b5"],
+ CellLabel->"In[1]:=",ExpressionUUID->"453c4a73-c0c8-4587-9498-dbbc40b581b5"],
 
 Cell[CellGroupData[{
 
@@ -40,34 +40,88 @@ Cell[BoxData[
  RowBox[{"PacletDirectoryLoad", 
   "[", "\"\</Users/arnoudb/stash/image/ImageLink\>\"", "]"}]], "Input",
  CellChangeTimes->{{3.986048129158723*^9, 3.986048129160139*^9}},
- CellLabel->"In[41]:=",ExpressionUUID->"23ceb94d-cff9-43d9-80f7-cf7d1886de3e"],
+ CellLabel->"In[1]:=",ExpressionUUID->"23ceb94d-cff9-43d9-80f7-cf7d1886de3e"],
 
 Cell[BoxData[
  RowBox[{"{", "\<\"/Users/arnoudb/stash/image/ImageLink\"\>", "}"}]], "Output",\
 
- CellChangeTimes->{3.986048136519002*^9},
- CellLabel->"Out[41]=",ExpressionUUID->"1ec42c45-8fb9-4d19-beee-b76482e25b7c"]
+ CellChangeTimes->{3.986048136519002*^9, 3.986049198941821*^9},
+ CellLabel->"Out[1]=",ExpressionUUID->"4ffb5f34-084c-401b-9b34-fbb4d840dd5f"]
 }, Open  ]],
 
 Cell[BoxData[
  RowBox[{"Needs", "[", "\"\<ImageLink`\>\"", "]"}]], "Input",
  CellChangeTimes->{{3.98604813836675*^9, 3.986048141468287*^9}},
- CellLabel->"In[42]:=",ExpressionUUID->"72e6e618-30b3-4dcd-b5b1-3f900ae64d7e"],
+ CellLabel->"In[2]:=",ExpressionUUID->"72e6e618-30b3-4dcd-b5b1-3f900ae64d7e"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{"ImageLinkVersion", "[", "]"}]], "Input",
  CellChangeTimes->{{3.986048146365355*^9, 3.9860481491021852`*^9}},
- CellLabel->"In[43]:=",ExpressionUUID->"c9e30dff-0330-4e10-8df0-f2e477486c6e"],
+ CellLabel->"In[3]:=",ExpressionUUID->"c9e30dff-0330-4e10-8df0-f2e477486c6e"],
 
 Cell[BoxData["\<\"0.1.0\"\>"], "Output",
- CellChangeTimes->{3.98604814942262*^9},
- CellLabel->"Out[43]=",ExpressionUUID->"4400a839-c769-4074-b995-1aed2c1f3252"]
-}, Open  ]]
+ CellChangeTimes->{3.98604814942262*^9, 3.98604920124655*^9},
+ CellLabel->"Out[3]=",ExpressionUUID->"0acce733-b254-4637-b98e-949317e906af"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FileType", "[", "\"\</Users/arnoudb/stash/image/input.png\>\"", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.986049281953395*^9, 3.986049298605619*^9}},
+ CellLabel->"In[6]:=",ExpressionUUID->"6f0a626c-e8d8-484d-b18d-b4ee4ff96bae"],
+
+Cell[BoxData["File"], "Output",
+ CellChangeTimes->{{3.986049285433055*^9, 3.986049299685096*^9}},
+ CellLabel->"Out[6]=",ExpressionUUID->"16b3297b-25d6-47f3-ae4d-1cddaa319c90"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"ImageLinkResize", "[", "\[IndentingNewLine]", 
+  RowBox[{"\"\</Users/arnoudb/stash/image/input.png\>\"", ",", 
+   "\[IndentingNewLine]", "\"\</Users/arnoudb/stash/image/output.png\>\"", ",", 
+   RowBox[{"{", 
+    RowBox[{"1920", ",", "1080"}], "}"}], ",", 
+   RowBox[{"Method", "->", "\"\<Lanczos3\>\""}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.9860491907996883`*^9, 3.9860492022400923`*^9}, {
+  3.986049255301993*^9, 3.9860492666834908`*^9}, {3.986049303992934*^9, 
+  3.986049313436837*^9}},ExpressionUUID->"2de2119e-94e9-4a5e-9775-\
+e310bd551f1e"],
+
+Cell[BoxData["\<\"Success\"\>"], "Output",
+ CellChangeTimes->{3.9860492685195513`*^9, 3.986049311731647*^9},
+ CellLabel->"Out[7]=",ExpressionUUID->"99dbe5e7-3d08-4cff-97e2-84c1ef754d1f"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["ImageResize"], "Input",
+ CellChangeTimes->{{3.986049369406075*^9, 
+  3.986049375922497*^9}},ExpressionUUID->"6669f996-2fea-4480-943c-\
+d694e2593005"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"Padding", "\[Rule]", "\<\"Reversed\"\>"}], ",", 
+   RowBox[{"Resampling", "\[Rule]", "Automatic"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.9860493729514503`*^9},
+ CellLabel->"Out[9]=",ExpressionUUID->"755ad942-b581-46b3-bece-182a4f5d088d"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"Import", "[", "\"\</Users/arnoudb/stash/image/output.png\>\"", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.9860493544792967`*^9, 3.986049356043076*^9}},
+ CellLabel->"In[8]:=",ExpressionUUID->"ea85c9b7-84e6-4c34-b4c4-6025e7a61cca"]
 },
-WindowSize->{808, 794},
-WindowMargins->{{220, Automatic}, {20, Automatic}},
+WindowSize->{1470, 894},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
 FrontEndVersion->"14.3 for Mac OS X ARM (64-bit) (July 8, 2025)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"babc91cb-ca62-4f72-9d03-40b64d098e51"
@@ -83,23 +137,34 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[554, 20, 175, 2, 29, "Input",ExpressionUUID->"453c4a73-c0c8-4587-9498-dbbc40b581b5"],
+Cell[554, 20, 174, 2, 29, "Input",ExpressionUUID->"453c4a73-c0c8-4587-9498-dbbc40b581b5"],
 Cell[CellGroupData[{
-Cell[754, 26, 179, 2, 29, "Input",ExpressionUUID->"be22a3a6-8eeb-474c-984d-16fbda6fb4c1"],
-Cell[936, 30, 205, 3, 33, "Output",ExpressionUUID->"118903ec-747c-440c-82e3-0d206cf69278"]
+Cell[753, 26, 179, 2, 29, "Input",ExpressionUUID->"be22a3a6-8eeb-474c-984d-16fbda6fb4c1"],
+Cell[935, 30, 205, 3, 33, "Output",ExpressionUUID->"118903ec-747c-440c-82e3-0d206cf69278"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1178, 38, 263, 4, 29, "Input",ExpressionUUID->"23ceb94d-cff9-43d9-80f7-cf7d1886de3e"],
-Cell[1444, 44, 216, 4, 33, "Output",ExpressionUUID->"1ec42c45-8fb9-4d19-beee-b76482e25b7c"]
+Cell[1177, 38, 262, 4, 29, "Input",ExpressionUUID->"23ceb94d-cff9-43d9-80f7-cf7d1886de3e"],
+Cell[1442, 44, 237, 4, 33, "Output",ExpressionUUID->"4ffb5f34-084c-401b-9b34-fbb4d840dd5f"]
 }, Open  ]],
-Cell[1675, 51, 219, 3, 29, "Input",ExpressionUUID->"72e6e618-30b3-4dcd-b5b1-3f900ae64d7e"],
+Cell[1694, 51, 218, 3, 29, "Input",ExpressionUUID->"72e6e618-30b3-4dcd-b5b1-3f900ae64d7e"],
 Cell[CellGroupData[{
-Cell[1919, 58, 211, 3, 29, "Input",ExpressionUUID->"c9e30dff-0330-4e10-8df0-f2e477486c6e"],
-Cell[2133, 63, 160, 2, 33, "Output",ExpressionUUID->"4400a839-c769-4074-b995-1aed2c1f3252"]
-}, Open  ]]
+Cell[1937, 58, 210, 3, 29, "Input",ExpressionUUID->"c9e30dff-0330-4e10-8df0-f2e477486c6e"],
+Cell[2150, 63, 180, 2, 33, "Output",ExpressionUUID->"0acce733-b254-4637-b98e-949317e906af"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2367, 70, 251, 4, 29, "Input",ExpressionUUID->"6f0a626c-e8d8-484d-b18d-b4ee4ff96bae"],
+Cell[2621, 76, 175, 2, 33, "Output",ExpressionUUID->"16b3297b-25d6-47f3-ae4d-1cddaa319c90"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2833, 83, 575, 10, 70, "Input",ExpressionUUID->"2de2119e-94e9-4a5e-9775-e310bd551f1e"],
+Cell[3411, 95, 186, 2, 33, "Output",ExpressionUUID->"99dbe5e7-3d08-4cff-97e2-84c1ef754d1f"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3634, 102, 163, 3, 29, "Input",ExpressionUUID->"6669f996-2fea-4480-943c-d694e2593005"],
+Cell[3800, 107, 293, 6, 33, "Output",ExpressionUUID->"755ad942-b581-46b3-bece-182a4f5d088d"]
+}, Open  ]],
+Cell[4108, 116, 252, 4, 29, "Input",ExpressionUUID->"ea85c9b7-84e6-4c34-b4c4-6025e7a61cca"]
 }
 ]
 *)
-
-(* End of internal cache information *)
 

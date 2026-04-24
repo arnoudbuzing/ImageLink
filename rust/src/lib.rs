@@ -30,3 +30,357 @@ fn resize_image(input: String, output: String, width: i64, height: i64, filter_n
         Err(e) => format!("Error saving output: {}", e),
     }
 }
+#[export]
+fn flip_image(input: String, output: String, direction: String) -> String {
+    let img = match image::open(&input) {
+        Ok(img) => img,
+        Err(e) => return format!("Error opening input: {}", e),
+    };
+
+    let flipped = match direction.as_str() {
+        "Horizontal" => img.fliph(),
+        "Vertical" => img.flipv(),
+        _ => return format!("Error: Unknown flip direction '{}'", direction),
+    };
+
+    match flipped.save(&output) {
+        Ok(_) => "Success".to_string(),
+        Err(e) => format!("Error saving output: {}", e),
+    }
+}
+
+#[export]
+fn rotate_image(input: String, output: String, angle: i64) -> String {
+    let img = match image::open(&input) {
+        Ok(img) => img,
+        Err(e) => return format!("Error opening input: {}", e),
+    };
+
+    let rotated = match angle {
+        90 => img.rotate90(),
+        180 => img.rotate180(),
+        270 => img.rotate270(),
+        _ => return format!("Error: Unsupported rotation angle {}", angle),
+    };
+
+    match rotated.save(&output) {
+        Ok(_) => "Success".to_string(),
+        Err(e) => format!("Error saving output: {}", e),
+    }
+}
+
+#[export]
+fn crop_image(input: String, output: String, x: i64, y: i64, w: i64, h: i64) -> String {
+    let mut img = match image::open(&input) {
+        Ok(img) => img,
+        Err(e) => return format!("Error opening input: {}", e),
+    };
+
+    let cropped = img.crop(x as u32, y as u32, w as u32, h as u32);
+
+    match cropped.save(&output) {
+        Ok(_) => "Success".to_string(),
+        Err(e) => format!("Error saving output: {}", e),
+    }
+}
+#[export]
+fn grayscale_image(input: String, output: String) -> String {
+    let img = match image::open(&input) {
+        Ok(img) => img,
+        Err(e) => return format!("Error opening input: {}", e),
+    };
+
+    let grayscaled = img.grayscale();
+
+    match grayscaled.save(&output) {
+        Ok(_) => "Success".to_string(),
+        Err(e) => format!("Error saving output: {}", e),
+    }
+}
+
+#[export]
+fn invert_image(input: String, output: String) -> String {
+    let mut img = match image::open(&input) {
+        Ok(img) => img,
+        Err(e) => return format!("Error opening input: {}", e),
+    };
+
+    img.invert();
+
+    match img.save(&output) {
+        Ok(_) => "Success".to_string(),
+        Err(e) => format!("Error saving output: {}", e),
+    }
+}
+#[export]
+fn blur_image(input: String, output: String, sigma: f64) -> String {
+    let img = match image::open(&input) {
+        Ok(img) => img,
+        Err(e) => return format!("Error opening input: {}", e),
+    };
+
+    let blurred = img.blur(sigma as f32);
+
+    match blurred.save(&output) {
+        Ok(_) => "Success".to_string(),
+        Err(e) => format!("Error saving output: {}", e),
+    }
+}
+
+#[export]
+fn unsharpen_image(input: String, output: String, sigma: f64, threshold: i64) -> String {
+    let img = match image::open(&input) {
+        Ok(img) => img,
+        Err(e) => return format!("Error opening input: {}", e),
+    };
+
+    let unsharpened = img.unsharpen(sigma as f32, threshold as i32);
+
+    match unsharpened.save(&output) {
+        Ok(_) => "Success".to_string(),
+        Err(e) => format!("Error saving output: {}", e),
+    }
+}
+#[export]
+fn image_dimensions(input: String) -> String {
+    match image::open(&input) {
+        Ok(img) => format!("{},{}", img.width(), img.height()),
+        Err(e) => format!("Error: {}", e),
+    }
+}
+
+#[export]
+fn image_color_type(input: String) -> String {
+    match image::open(&input) {
+        Ok(img) => format!("{:?}", img.color()),
+        Err(e) => format!("Error: {}", e),
+    }
+}
+
+use wolfram_library_link::NumericArray;
+use image::{ImageBuffer, Rgb, Rgba};
+
+#[export]
+fn blur_memory(array: &NumericArray<u8>, sigma: f64) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let blurred = image::imageops::blur(&img, sigma as f32);
+        NumericArray::<u8>::from_slice(blurred.as_raw())
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let blurred = image::imageops::blur(&img, sigma as f32);
+        NumericArray::<u8>::from_slice(blurred.as_raw())
+    } else {
+        NumericArray::<u8>::from_slice(slice)
+    }
+}
+
+#[export]
+fn invert_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        image::imageops::invert(&mut img);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        image::imageops::invert(&mut img);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else {
+        NumericArray::<u8>::from_slice(slice)
+    }
+}
+
+#[export]
+fn unsharpen_memory(array: &NumericArray<u8>, sigma: f64, threshold: i64) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let unsharpened = image::imageops::unsharpen(&img, sigma as f32, threshold as i32);
+        NumericArray::<u8>::from_slice(unsharpened.as_raw())
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let unsharpened = image::imageops::unsharpen(&img, sigma as f32, threshold as i32);
+        NumericArray::<u8>::from_slice(unsharpened.as_raw())
+    } else {
+        NumericArray::<u8>::from_slice(slice)
+    }
+}
+
+#[export]
+fn flip_memory(array: &NumericArray<u8>, direction: String) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let flipped = match direction.as_str() {
+            "Horizontal" => image::imageops::flip_horizontal(&img),
+            "Vertical" => image::imageops::flip_vertical(&img),
+            _ => img,
+        };
+        NumericArray::<u8>::from_slice(flipped.as_raw())
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let flipped = match direction.as_str() {
+            "Horizontal" => image::imageops::flip_horizontal(&img),
+            "Vertical" => image::imageops::flip_vertical(&img),
+            _ => img,
+        };
+        NumericArray::<u8>::from_slice(flipped.as_raw())
+    } else {
+        NumericArray::<u8>::from_slice(slice)
+    }
+}
+#[export]
+fn rotate_memory(array: &NumericArray<u8>, angle: i64) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let rotated = match angle {
+            90 => image::imageops::rotate90(&img).as_raw().clone(),
+            180 => image::imageops::rotate180(&img).as_raw().clone(),
+            270 => image::imageops::rotate270(&img).as_raw().clone(),
+            _ => img.as_raw().clone(),
+        };
+        NumericArray::<u8>::from_slice(&rotated)
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let rotated = match angle {
+            90 => image::imageops::rotate90(&img).as_raw().clone(),
+            180 => image::imageops::rotate180(&img).as_raw().clone(),
+            270 => image::imageops::rotate270(&img).as_raw().clone(),
+            _ => img.as_raw().clone(),
+        };
+        NumericArray::<u8>::from_slice(&rotated)
+    } else {
+        NumericArray::<u8>::from_slice(slice)
+    }
+}
+
+#[export]
+fn grayscale_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let grayscaled = image::imageops::grayscale(&img);
+        NumericArray::<u8>::from_slice(grayscaled.as_raw())
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let grayscaled = image::imageops::grayscale(&img);
+        NumericArray::<u8>::from_slice(grayscaled.as_raw())
+    } else {
+        NumericArray::<u8>::from_slice(slice)
+    }
+}
+#[export]
+fn crop_memory(array: &NumericArray<u8>, x: i64, y: i64, target_w: i64, target_h: i64) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let cropped = image::imageops::crop(&mut img, x as u32, y as u32, target_w as u32, target_h as u32).to_image();
+        NumericArray::<u8>::from_slice(cropped.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let cropped = image::imageops::crop(&mut img, x as u32, y as u32, target_w as u32, target_h as u32).to_image();
+        NumericArray::<u8>::from_slice(cropped.as_raw())
+    } else {
+        NumericArray::<u8>::from_slice(slice)
+    }
+}
+
+#[export]
+fn resize_memory(array: &NumericArray<u8>, target_w: i64, target_h: i64, filter_name: String) -> NumericArray<u8> {
+    let filter = match filter_name.as_str() {
+        "Nearest" => FilterType::Nearest,
+        "Triangle" => FilterType::Triangle,
+        "CatmullRom" => FilterType::CatmullRom,
+        "Gaussian" => FilterType::Gaussian,
+        "Lanczos3" => FilterType::Lanczos3,
+        _ => FilterType::Triangle,
+    };
+
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let resized = image::imageops::resize(&img, target_w as u32, target_h as u32, filter);
+        NumericArray::<u8>::from_slice(resized.as_raw())
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let resized = image::imageops::resize(&img, target_w as u32, target_h as u32, filter);
+        NumericArray::<u8>::from_slice(resized.as_raw())
+    } else {
+        NumericArray::<u8>::from_slice(slice)
+    }
+}

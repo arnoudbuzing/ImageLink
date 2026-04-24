@@ -1,6 +1,3 @@
 [env]
 WOLFRAM_APP_DIRECTORY = { value = "../wolfram", relative = true }
-WSTP_COMPILER_ADDITIONS = { value = "../wolfram/WSTP/DeveloperKit/Windows-x86-64/CompilerAdditions", relative = true }
-WSTP_STATIC = "0"
-WSTP_LIB_DIR = { value = "../wolfram/WSTP/DeveloperKit/Windows-x86-64/CompilerAdditions", relative = true }
-WSTP_LIB_NAME = "wstp64i4"
+WSTP_COMPILER_ADDITIONS = { value = "../wolfram/WSTP/DeveloperKit/MacOSX-ARM64/CompilerAdditions", relative = true }

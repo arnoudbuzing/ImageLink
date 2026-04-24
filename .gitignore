@@ -1,0 +1,8 @@
+# Rust build output
+rust/target/
+
+# OS X
+.DS_Store
+
+# Temporary files
+*.wl.tmp

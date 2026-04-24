@@ -1,0 +1,105 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 14.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      3400,         95]
+NotebookOptionsPosition[      2309,         68]
+NotebookOutlinePosition[      2702,         84]
+CellTagsIndexPosition[      2659,         81]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData["Quit"], "Input",
+ CellChangeTimes->{{3.986048553669571*^9, 3.986048554049961*^9}},
+ CellLabel->"In[44]:=",ExpressionUUID->"453c4a73-c0c8-4587-9498-dbbc40b581b5"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["$Version"], "Input",
+ CellChangeTimes->{{3.986048126986071*^9, 3.986048127949561*^9}},
+ CellLabel->"In[40]:=",ExpressionUUID->"be22a3a6-8eeb-474c-984d-16fbda6fb4c1"],
+
+Cell[BoxData["\<\"14.3.0 for Mac OS X ARM (64-bit) (July 8, 2025)\"\>"], \
+"Output",
+ CellChangeTimes->{3.986048128345874*^9},
+ CellLabel->"Out[40]=",ExpressionUUID->"118903ec-747c-440c-82e3-0d206cf69278"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PacletDirectoryLoad", 
+  "[", "\"\</Users/arnoudb/stash/image/ImageLink\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.986048129158723*^9, 3.986048129160139*^9}},
+ CellLabel->"In[41]:=",ExpressionUUID->"23ceb94d-cff9-43d9-80f7-cf7d1886de3e"],
+
+Cell[BoxData[
+ RowBox[{"{", "\<\"/Users/arnoudb/stash/image/ImageLink\"\>", "}"}]], "Output",\
+
+ CellChangeTimes->{3.986048136519002*^9},
+ CellLabel->"Out[41]=",ExpressionUUID->"1ec42c45-8fb9-4d19-beee-b76482e25b7c"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<ImageLink`\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.98604813836675*^9, 3.986048141468287*^9}},
+ CellLabel->"In[42]:=",ExpressionUUID->"72e6e618-30b3-4dcd-b5b1-3f900ae64d7e"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"ImageLinkVersion", "[", "]"}]], "Input",
+ CellChangeTimes->{{3.986048146365355*^9, 3.9860481491021852`*^9}},
+ CellLabel->"In[43]:=",ExpressionUUID->"c9e30dff-0330-4e10-8df0-f2e477486c6e"],
+
+Cell[BoxData["\<\"0.1.0\"\>"], "Output",
+ CellChangeTimes->{3.98604814942262*^9},
+ CellLabel->"Out[43]=",ExpressionUUID->"4400a839-c769-4074-b995-1aed2c1f3252"]
+}, Open  ]]
+},
+WindowSize->{808, 794},
+WindowMargins->{{220, Automatic}, {20, Automatic}},
+FrontEndVersion->"14.3 for Mac OS X ARM (64-bit) (July 8, 2025)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"babc91cb-ca62-4f72-9d03-40b64d098e51"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[554, 20, 175, 2, 29, "Input",ExpressionUUID->"453c4a73-c0c8-4587-9498-dbbc40b581b5"],
+Cell[CellGroupData[{
+Cell[754, 26, 179, 2, 29, "Input",ExpressionUUID->"be22a3a6-8eeb-474c-984d-16fbda6fb4c1"],
+Cell[936, 30, 205, 3, 33, "Output",ExpressionUUID->"118903ec-747c-440c-82e3-0d206cf69278"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1178, 38, 263, 4, 29, "Input",ExpressionUUID->"23ceb94d-cff9-43d9-80f7-cf7d1886de3e"],
+Cell[1444, 44, 216, 4, 33, "Output",ExpressionUUID->"1ec42c45-8fb9-4d19-beee-b76482e25b7c"]
+}, Open  ]],
+Cell[1675, 51, 219, 3, 29, "Input",ExpressionUUID->"72e6e618-30b3-4dcd-b5b1-3f900ae64d7e"],
+Cell[CellGroupData[{
+Cell[1919, 58, 211, 3, 29, "Input",ExpressionUUID->"c9e30dff-0330-4e10-8df0-f2e477486c6e"],
+Cell[2133, 63, 160, 2, 33, "Output",ExpressionUUID->"4400a839-c769-4074-b995-1aed2c1f3252"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
+

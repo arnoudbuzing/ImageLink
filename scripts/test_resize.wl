@@ -1,11 +1,15 @@
-PacletDirectoryLoad[FileNameJoin[{Directory[], "ImageLink"}]];
+$ScriptDir = DirectoryName[$InputFileName];
+PacletDirectoryLoad[ParentDirectory[$ScriptDir]];
 Needs["ImageLink`"]
 
-Export["input.png", RandomImage[1, {100, 100}]];
-result = ImageLinkResize["input.png", "output.png", {50, 50}, Method -> "Lanczos3"];
+inputPath = FileNameJoin[{$ScriptDir, "input.png"}];
+outputPath = FileNameJoin[{$ScriptDir, "output.png"}];
+
+Export[inputPath, RandomImage[1, {100, 100}]];
+result = ImageLinkResize[inputPath, outputPath, {50, 50}, Method -> "Lanczos3"];
 
 Print["Result: ", result];
-If[FileExistsQ["output.png"],
-    img = Import["output.png"];
+If[FileExistsQ[outputPath],
+    img = Import[outputPath];
     Print["New Dimensions: ", ImageDimensions[img]];
 ]

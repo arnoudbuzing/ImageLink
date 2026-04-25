@@ -384,3 +384,527 @@ fn resize_memory(array: &NumericArray<u8>, target_w: i64, target_h: i64, filter_
         NumericArray::<u8>::from_slice(slice)
     }
 }
+#[export]
+fn canny_memory(array: &NumericArray<u8>, low: f64, high: f64) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    let gray_img = if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        image::imageops::grayscale(&img)
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        image::imageops::grayscale(&img)
+    } else {
+        return NumericArray::<u8>::from_slice(slice);
+    };
+
+    let edges = imageproc::edges::canny(&gray_img, low as f32, high as f32);
+    NumericArray::<u8>::from_slice(edges.as_raw())
+}
+#[export]
+fn dilate_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    let mask = imageproc::morphology::Mask::square(radius as u8);
+
+    if channels == 1 {
+        let img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let dilated = imageproc::morphology::grayscale_dilate(&img, &mask);
+        return NumericArray::<u8>::from_slice(dilated.as_raw());
+    }
+
+    let mut out_slice = vec![0u8; (w * h * channels) as usize];
+    
+    for c in 0..channels {
+        let mut channel = ImageBuffer::<image::Luma<u8>, _>::new(w, h);
+        for y in 0..h {
+            for x in 0..w {
+                let idx = ((y * w + x) * channels + c) as usize;
+                channel.put_pixel(x, y, image::Luma([slice[idx]]));
+            }
+        }
+        
+        let dilated_channel = imageproc::morphology::grayscale_dilate(&channel, &mask);
+        
+        for y in 0..h {
+            for x in 0..w {
+                let idx = ((y * w + x) * channels + c) as usize;
+                out_slice[idx] = dilated_channel.get_pixel(x, y)[0];
+            }
+        }
+    }
+    
+    NumericArray::<u8>::from_slice(&out_slice)
+}
+
+#[export]
+fn erode_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    let mask = imageproc::morphology::Mask::square(radius as u8);
+
+    if channels == 1 {
+        let img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let eroded = imageproc::morphology::grayscale_erode(&img, &mask);
+        return NumericArray::<u8>::from_slice(eroded.as_raw());
+    }
+
+    let mut out_slice = vec![0u8; (w * h * channels) as usize];
+    
+    for c in 0..channels {
+        let mut channel = ImageBuffer::<image::Luma<u8>, _>::new(w, h);
+        for y in 0..h {
+            for x in 0..w {
+                let idx = ((y * w + x) * channels + c) as usize;
+                channel.put_pixel(x, y, image::Luma([slice[idx]]));
+            }
+        }
+        
+        let eroded_channel = imageproc::morphology::grayscale_erode(&channel, &mask);
+        
+        for y in 0..h {
+            for x in 0..w {
+                let idx = ((y * w + x) * channels + c) as usize;
+                out_slice[idx] = eroded_channel.get_pixel(x, y)[0];
+            }
+        }
+    }
+    
+    NumericArray::<u8>::from_slice(&out_slice)
+}
+
+#[export]
+fn median_memory(array: &NumericArray<u8>, x_radius: i64, y_radius: i64) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let filtered = imageproc::filter::median_filter(&img, x_radius as u32, y_radius as u32);
+        NumericArray::<u8>::from_slice(filtered.as_raw())
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let filtered = imageproc::filter::median_filter(&img, x_radius as u32, y_radius as u32);
+        NumericArray::<u8>::from_slice(filtered.as_raw())
+    } else {
+        let img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let filtered = imageproc::filter::median_filter(&img, x_radius as u32, y_radius as u32);
+        NumericArray::<u8>::from_slice(filtered.as_raw())
+    }
+}
+
+#[export]
+fn filter3x3_memory(array: &NumericArray<u8>, kernel_array: &NumericArray<f64>) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let kernel_slice = kernel_array.as_slice();
+    let mut kernel = [0.0f32; 9];
+    for i in 0..9.min(kernel_slice.len()) {
+        kernel[i] = kernel_slice[i] as f32;
+    }
+
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let filtered = image::imageops::filter3x3(&img, &kernel);
+        NumericArray::<u8>::from_slice(filtered.as_raw())
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let filtered = image::imageops::filter3x3(&img, &kernel);
+        NumericArray::<u8>::from_slice(filtered.as_raw())
+    } else {
+        let img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let filtered = image::imageops::filter3x3(&img, &kernel);
+        NumericArray::<u8>::from_slice(filtered.as_raw())
+    }
+}
+
+#[export]
+fn equalize_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if channels == 1 {
+        let img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let eq = imageproc::contrast::equalize_histogram(&img);
+        return NumericArray::<u8>::from_slice(eq.as_raw());
+    }
+
+    let mut out_slice = vec![0u8; (w * h * channels) as usize];
+    
+    for c in 0..channels {
+        let mut channel = ImageBuffer::<image::Luma<u8>, _>::new(w, h);
+        for y in 0..h {
+            for x in 0..w {
+                let idx = ((y * w + x) * channels + c) as usize;
+                channel.put_pixel(x, y, image::Luma([slice[idx]]));
+            }
+        }
+        
+        let eq_channel = imageproc::contrast::equalize_histogram(&channel);
+        
+        for y in 0..h {
+            for x in 0..w {
+                let idx = ((y * w + x) * channels + c) as usize;
+                out_slice[idx] = eq_channel.get_pixel(x, y)[0];
+            }
+        }
+    }
+    
+    NumericArray::<u8>::from_slice(&out_slice)
+}
+
+#[export]
+fn adaptive_threshold_memory(array: &NumericArray<u8>, block_radius: i64, delta: i64) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    let gray_img = if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        image::imageops::grayscale(&img)
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        image::imageops::grayscale(&img)
+    } else {
+        ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap()
+    };
+
+    let thresh = imageproc::contrast::adaptive_threshold(&gray_img, block_radius as u32, delta as i32);
+    NumericArray::<u8>::from_slice(thresh.as_raw())
+}
+
+#[export]
+fn draw_line_memory(array: &NumericArray<u8>, x1: f64, y1: f64, x2: f64, y2: f64, color_array: &NumericArray<u8>) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+    let color_slice = color_array.as_slice();
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 3 {
+            Rgb([color_slice[0], color_slice[1], color_slice[2]])
+        } else {
+            Rgb([255, 255, 255])
+        };
+        imageproc::drawing::draw_line_segment_mut(&mut img, (x1 as f32, y1 as f32), (x2 as f32, y2 as f32), c);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 4 {
+            Rgba([color_slice[0], color_slice[1], color_slice[2], color_slice[3]])
+        } else if color_slice.len() >= 3 {
+            Rgba([color_slice[0], color_slice[1], color_slice[2], 255])
+        } else {
+            Rgba([255, 255, 255, 255])
+        };
+        imageproc::drawing::draw_line_segment_mut(&mut img, (x1 as f32, y1 as f32), (x2 as f32, y2 as f32), c);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else {
+        let mut img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if !color_slice.is_empty() {
+            image::Luma([color_slice[0]])
+        } else {
+            image::Luma([255])
+        };
+        imageproc::drawing::draw_line_segment_mut(&mut img, (x1 as f32, y1 as f32), (x2 as f32, y2 as f32), c);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    }
+}
+
+#[export]
+fn draw_rect_memory(array: &NumericArray<u8>, x: i64, y: i64, rect_w: i64, rect_h: i64, color_array: &NumericArray<u8>, filled: bool) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+    let color_slice = color_array.as_slice();
+    let rect = imageproc::rect::Rect::at(x as i32, y as i32).of_size(rect_w as u32, rect_h as u32);
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 3 {
+            Rgb([color_slice[0], color_slice[1], color_slice[2]])
+        } else {
+            Rgb([255, 255, 255])
+        };
+        if filled {
+            imageproc::drawing::draw_filled_rect_mut(&mut img, rect, c);
+        } else {
+            imageproc::drawing::draw_hollow_rect_mut(&mut img, rect, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 4 {
+            Rgba([color_slice[0], color_slice[1], color_slice[2], color_slice[3]])
+        } else if color_slice.len() >= 3 {
+            Rgba([color_slice[0], color_slice[1], color_slice[2], 255])
+        } else {
+            Rgba([255, 255, 255, 255])
+        };
+        if filled {
+            imageproc::drawing::draw_filled_rect_mut(&mut img, rect, c);
+        } else {
+            imageproc::drawing::draw_hollow_rect_mut(&mut img, rect, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else {
+        let mut img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if !color_slice.is_empty() {
+            image::Luma([color_slice[0]])
+        } else {
+            image::Luma([255])
+        };
+        if filled {
+            imageproc::drawing::draw_filled_rect_mut(&mut img, rect, c);
+        } else {
+            imageproc::drawing::draw_hollow_rect_mut(&mut img, rect, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    }
+}
+
+#[export]
+fn draw_circle_memory(array: &NumericArray<u8>, cx: i64, cy: i64, radius: i64, color_array: &NumericArray<u8>, filled: bool) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+    let color_slice = color_array.as_slice();
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 3 {
+            Rgb([color_slice[0], color_slice[1], color_slice[2]])
+        } else {
+            Rgb([255, 255, 255])
+        };
+        if filled {
+            imageproc::drawing::draw_filled_circle_mut(&mut img, (cx as i32, cy as i32), radius as i32, c);
+        } else {
+            imageproc::drawing::draw_hollow_circle_mut(&mut img, (cx as i32, cy as i32), radius as i32, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 4 {
+            Rgba([color_slice[0], color_slice[1], color_slice[2], color_slice[3]])
+        } else if color_slice.len() >= 3 {
+            Rgba([color_slice[0], color_slice[1], color_slice[2], 255])
+        } else {
+            Rgba([255, 255, 255, 255])
+        };
+        if filled {
+            imageproc::drawing::draw_filled_circle_mut(&mut img, (cx as i32, cy as i32), radius as i32, c);
+        } else {
+            imageproc::drawing::draw_hollow_circle_mut(&mut img, (cx as i32, cy as i32), radius as i32, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else {
+        let mut img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if !color_slice.is_empty() {
+            image::Luma([color_slice[0]])
+        } else {
+            image::Luma([255])
+        };
+        if filled {
+            imageproc::drawing::draw_filled_circle_mut(&mut img, (cx as i32, cy as i32), radius as i32, c);
+        } else {
+            imageproc::drawing::draw_hollow_circle_mut(&mut img, (cx as i32, cy as i32), radius as i32, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    }
+}
+
+#[export]
+fn draw_ellipse_memory(array: &NumericArray<u8>, cx: i64, cy: i64, rx: i64, ry: i64, color_array: &NumericArray<u8>, filled: bool) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+    let color_slice = color_array.as_slice();
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 3 {
+            Rgb([color_slice[0], color_slice[1], color_slice[2]])
+        } else {
+            Rgb([255, 255, 255])
+        };
+        if filled {
+            imageproc::drawing::draw_filled_ellipse_mut(&mut img, (cx as i32, cy as i32), rx as i32, ry as i32, c);
+        } else {
+            imageproc::drawing::draw_hollow_ellipse_mut(&mut img, (cx as i32, cy as i32), rx as i32, ry as i32, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 4 {
+            Rgba([color_slice[0], color_slice[1], color_slice[2], color_slice[3]])
+        } else if color_slice.len() >= 3 {
+            Rgba([color_slice[0], color_slice[1], color_slice[2], 255])
+        } else {
+            Rgba([255, 255, 255, 255])
+        };
+        if filled {
+            imageproc::drawing::draw_filled_ellipse_mut(&mut img, (cx as i32, cy as i32), rx as i32, ry as i32, c);
+        } else {
+            imageproc::drawing::draw_hollow_ellipse_mut(&mut img, (cx as i32, cy as i32), rx as i32, ry as i32, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else {
+        let mut img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if !color_slice.is_empty() {
+            image::Luma([color_slice[0]])
+        } else {
+            image::Luma([255])
+        };
+        if filled {
+            imageproc::drawing::draw_filled_ellipse_mut(&mut img, (cx as i32, cy as i32), rx as i32, ry as i32, c);
+        } else {
+            imageproc::drawing::draw_hollow_ellipse_mut(&mut img, (cx as i32, cy as i32), rx as i32, ry as i32, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    }
+}
+
+#[export]
+fn draw_polygon_memory(array: &NumericArray<u8>, points_x: &NumericArray<i64>, points_y: &NumericArray<i64>, color_array: &NumericArray<u8>, filled: bool) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+    let color_slice = color_array.as_slice();
+
+    let px = points_x.as_slice();
+    let py = points_y.as_slice();
+    let mut poly_i32 = Vec::new();
+    let mut poly_f32 = Vec::new();
+    let len = std::cmp::min(px.len(), py.len());
+    for i in 0..len {
+        poly_i32.push(imageproc::point::Point::new(px[i] as i32, py[i] as i32));
+        poly_f32.push(imageproc::point::Point::new(px[i] as f32, py[i] as f32));
+    }
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 3 {
+            Rgb([color_slice[0], color_slice[1], color_slice[2]])
+        } else {
+            Rgb([255, 255, 255])
+        };
+        if filled {
+            imageproc::drawing::draw_polygon_mut(&mut img, &poly_i32, c);
+        } else {
+            imageproc::drawing::draw_hollow_polygon_mut(&mut img, &poly_f32, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 4 {
+            Rgba([color_slice[0], color_slice[1], color_slice[2], color_slice[3]])
+        } else if color_slice.len() >= 3 {
+            Rgba([color_slice[0], color_slice[1], color_slice[2], 255])
+        } else {
+            Rgba([255, 255, 255, 255])
+        };
+        if filled {
+            imageproc::drawing::draw_polygon_mut(&mut img, &poly_i32, c);
+        } else {
+            imageproc::drawing::draw_hollow_polygon_mut(&mut img, &poly_f32, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else {
+        let mut img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if !color_slice.is_empty() {
+            image::Luma([color_slice[0]])
+        } else {
+            image::Luma([255])
+        };
+        if filled {
+            imageproc::drawing::draw_polygon_mut(&mut img, &poly_i32, c);
+        } else {
+            imageproc::drawing::draw_hollow_polygon_mut(&mut img, &poly_f32, c);
+        }
+        NumericArray::<u8>::from_slice(img.as_raw())
+    }
+}

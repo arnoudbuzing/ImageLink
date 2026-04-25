@@ -19,6 +19,18 @@ ImageLinkRotateMemory::usage = "ImageLinkRotateMemory[image, angle] rotates an I
 ImageLinkGrayscaleMemory::usage = "ImageLinkGrayscaleMemory[image] converts an Image object to grayscale directly in memory."
 ImageLinkCropMemory::usage = "ImageLinkCropMemory[image, {x, y, w, h}] crops an Image object directly in memory."
 ImageLinkResizeMemory::usage = "ImageLinkResizeMemory[image, {width, height}, Method -> \"Triangle\"] resizes an Image object directly in memory."
+ImageLinkCannyMemory::usage = "ImageLinkCannyMemory[image, low, high] applies Canny edge detection directly in memory."
+ImageLinkDilateMemory::usage = "ImageLinkDilateMemory[image, radius] dilates an Image object directly in memory."
+ImageLinkErodeMemory::usage = "ImageLinkErodeMemory[image, radius] erodes an Image object directly in memory."
+ImageLinkMedianFilterMemory::usage = "ImageLinkMedianFilterMemory[image, xRadius, yRadius] applies a median filter to an Image object directly in memory."
+ImageLinkFilter3x3Memory::usage = "ImageLinkFilter3x3Memory[image, kernel] applies a 3x3 custom convolution kernel to an Image object directly in memory."
+ImageLinkEqualizeHistogramMemory::usage = "ImageLinkEqualizeHistogramMemory[image] equalizes the histogram of an Image object directly in memory."
+ImageLinkAdaptiveThresholdMemory::usage = "ImageLinkAdaptiveThresholdMemory[image, blockRadius, delta] applies an adaptive threshold directly in memory."
+ImageLinkDrawLineMemory::usage = "ImageLinkDrawLineMemory[image, {x1, y1}, {x2, y2}, color] draws a line segment directly in memory."
+ImageLinkDrawRectangleMemory::usage = "ImageLinkDrawRectangleMemory[image, {x, y, w, h}, color, Filled -> False] draws a rectangle directly in memory."
+ImageLinkDrawCircleMemory::usage = "ImageLinkDrawCircleMemory[image, {x, y}, radius, color, Filled -> False] draws a circle directly in memory."
+ImageLinkDrawEllipseMemory::usage = "ImageLinkDrawEllipseMemory[image, {x, y}, {rx, ry}, color, Filled -> False] draws an ellipse directly in memory."
+ImageLinkDrawPolygonMemory::usage = "ImageLinkDrawPolygonMemory[image, {{x1,y1}, {x2,y2}, ...}, color, Filled -> False] draws a polygon directly in memory."
 
 Begin["`Private`"]
 
@@ -43,11 +55,27 @@ imageLinkRotateMemoryFunc = LibraryFunctionLoad[$LibraryFile, "rotate_memory", {
 imageLinkGrayscaleMemoryFunc = LibraryFunctionLoad[$LibraryFile, "grayscale_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 imageLinkCropMemoryFunc = LibraryFunctionLoad[$LibraryFile, "crop_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 imageLinkResizeMemoryFunc = LibraryFunctionLoad[$LibraryFile, "resize_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, "UTF8String"}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkCannyMemoryFunc = LibraryFunctionLoad[$LibraryFile, "canny_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Real, Real}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkDilateMemoryFunc = LibraryFunctionLoad[$LibraryFile, "dilate_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkErodeMemoryFunc = LibraryFunctionLoad[$LibraryFile, "erode_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkMedianFilterMemoryFunc = LibraryFunctionLoad[$LibraryFile, "median_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkFilter3x3MemoryFunc = LibraryFunctionLoad[$LibraryFile, "filter3x3_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "Real64"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkEqualizeHistogramMemoryFunc = LibraryFunctionLoad[$LibraryFile, "equalize_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkAdaptiveThresholdMemoryFunc = LibraryFunctionLoad[$LibraryFile, "adaptive_threshold_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkDrawLineMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_line_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Real, Real, Real, Real, {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkDrawRectMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_rect_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, True|False}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkDrawCircleMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_circle_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, True|False}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkDrawEllipseMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_ellipse_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, True|False}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkDrawPolygonMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_polygon_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "Integer64"]}, {LibraryDataType[NumericArray, "Integer64"]}, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, True|False}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 
 ImageLinkVersion[] := imageLinkVersionFunc[]
 
 Options[ImageLinkResize] = {Method -> "Triangle"}
 Options[ImageLinkResizeMemory] = {Method -> "Triangle"}
+Options[ImageLinkDrawRectangleMemory] = {Filled -> False}
+Options[ImageLinkDrawCircleMemory] = {Filled -> False}
+Options[ImageLinkDrawEllipseMemory] = {Filled -> False}
+Options[ImageLinkDrawPolygonMemory] = {Filled -> False}
 
 ImageLinkResize[input_String, output_String, {width_Integer, height_Integer}, OptionsPattern[]] := Module[{method},
   method = OptionValue[Method];
@@ -163,6 +191,130 @@ ImageLinkResizeMemory[img_Image, {width_Integer, height_Integer}, OptionsPattern
   newDims = {height, width, dims[[3]]};
   
   Image[NumericArray[ArrayReshape[Normal[res1d], newDims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkCannyMemory[img_Image, low_?NumericQ, high_?NumericQ] := Module[
+  {na, res1d, dims, newDims},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  res1d = imageLinkCannyMemoryFunc[na, N[low], N[high]];
+  
+  newDims = {dims[[1]], dims[[2]], 1};
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], newDims], "UnsignedInteger8"], "Byte", ColorSpace -> "Grayscale"]
+]
+
+ImageLinkDilateMemory[img_Image, radius_Integer] := Module[
+  {na, res1d, dims},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  res1d = imageLinkDilateMemoryFunc[na, radius];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkErodeMemory[img_Image, radius_Integer] := Module[
+  {na, res1d, dims},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  res1d = imageLinkErodeMemoryFunc[na, radius];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkMedianFilterMemory[img_Image, xRadius_Integer, yRadius_Integer] := Module[
+  {na, res1d, dims},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  res1d = imageLinkMedianFilterMemoryFunc[na, xRadius, yRadius];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkFilter3x3Memory[img_Image, kernel_?MatrixQ] := Module[
+  {na, res1d, dims, kernelNA},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  kernelNA = NumericArray[Flatten[N[kernel]], "Real64"];
+  res1d = imageLinkFilter3x3MemoryFunc[na, kernelNA];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkEqualizeHistogramMemory[img_Image] := Module[
+  {na, res1d, dims},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  res1d = imageLinkEqualizeHistogramMemoryFunc[na];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkAdaptiveThresholdMemory[img_Image, blockRadius_Integer, delta_Integer] := Module[
+  {na, res1d, dims, newDims},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  res1d = imageLinkAdaptiveThresholdMemoryFunc[na, blockRadius, delta];
+  
+  newDims = {dims[[1]], dims[[2]], 1};
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], newDims], "UnsignedInteger8"], "Byte", ColorSpace -> "Grayscale"]
+]
+
+ImageLinkDrawLineMemory[img_Image, {x1_?NumericQ, y1_?NumericQ}, {x2_?NumericQ, y2_?NumericQ}, color_List] := Module[
+  {na, res1d, dims, colorNA},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  colorNA = NumericArray[Round[color * 255], "UnsignedInteger8"];
+  res1d = imageLinkDrawLineMemoryFunc[na, N[x1], N[y1], N[x2], N[y2], colorNA];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkDrawRectangleMemory[img_Image, {x_Integer, y_Integer, w_Integer, h_Integer}, color_List, OptionsPattern[]] := Module[
+  {na, res1d, dims, colorNA, filled},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  colorNA = NumericArray[Round[color * 255], "UnsignedInteger8"];
+  filled = TrueQ[OptionValue[Filled]];
+  res1d = imageLinkDrawRectMemoryFunc[na, x, y, w, h, colorNA, filled];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkDrawCircleMemory[img_Image, {x_Integer, y_Integer}, radius_Integer, color_List, OptionsPattern[]] := Module[
+  {na, res1d, dims, colorNA, filled},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  colorNA = NumericArray[Round[color * 255], "UnsignedInteger8"];
+  filled = TrueQ[OptionValue[Filled]];
+  res1d = imageLinkDrawCircleMemoryFunc[na, x, y, radius, colorNA, filled];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkDrawEllipseMemory[img_Image, {x_Integer, y_Integer}, {rx_Integer, ry_Integer}, color_List, OptionsPattern[]] := Module[
+  {na, res1d, dims, colorNA, filled},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  colorNA = NumericArray[Round[color * 255], "UnsignedInteger8"];
+  filled = TrueQ[OptionValue[Filled]];
+  res1d = imageLinkDrawEllipseMemoryFunc[na, x, y, rx, ry, colorNA, filled];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkDrawPolygonMemory[img_Image, points:{{_Integer, _Integer}..}, color_List, OptionsPattern[]] := Module[
+  {na, res1d, dims, colorNA, filled, pxNA, pyNA},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  colorNA = NumericArray[Round[color * 255], "UnsignedInteger8"];
+  filled = TrueQ[OptionValue[Filled]];
+  pxNA = NumericArray[points[[All, 1]], "Integer64"];
+  pyNA = NumericArray[points[[All, 2]], "Integer64"];
+  res1d = imageLinkDrawPolygonMemoryFunc[na, pxNA, pyNA, colorNA, filled];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
 ]
 
 End[]

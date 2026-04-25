@@ -79,7 +79,94 @@ unsharpened = ImageLinkUnsharpenMemory[img, 1.5, 10];
 
 ---
 
-## 2. File-Based Processing
+## 2. Advanced Image Processing & Computer Vision (In-Memory)
+
+The paclet provides advanced operations leveraging the `imageproc` Rust library. These operate directly on Wolfram `Image` objects.
+
+### `ImageLinkCannyMemory`
+Applies Canny edge detection. Requires lower and upper thresholds. Returns a binary grayscale image.
+```mathematica
+edges = ImageLinkCannyMemory[img, 50.0, 100.0];
+```
+
+### `ImageLinkDilateMemory` & `ImageLinkErodeMemory`
+Performs morphological dilation and erosion using a square structural element of the given radius. Properly processes each channel independently, preserving your original color space.
+```mathematica
+dilated = ImageLinkDilateMemory[img, 2];
+eroded = ImageLinkErodeMemory[img, 2];
+```
+
+### `ImageLinkMedianFilterMemory`
+Applies a median filter, highly effective at removing salt-and-pepper noise while preserving edges.
+```mathematica
+smoothed = ImageLinkMedianFilterMemory[img, 3, 3];
+```
+
+### `ImageLinkFilter3x3Memory`
+Applies a custom 3x3 convolution kernel directly to the image buffers.
+```mathematica
+kernel = {{-1, -1, -1}, 
+          {-1,  8, -1}, 
+          {-1, -1, -1}};
+sharpened = ImageLinkFilter3x3Memory[img, kernel];
+```
+
+### `ImageLinkEqualizeHistogramMemory`
+Normalizes the contrast of the image. Operates independently across channels to preserve RGB structures without collapsing to grayscale.
+```mathematica
+autoLevelImg = ImageLinkEqualizeHistogramMemory[img];
+```
+
+### `ImageLinkAdaptiveThresholdMemory`
+Applies adaptive local thresholding. Ideal for OCR, document scanning, and unevenly lit images. Converts to Grayscale internally and returns a binary threshold mask.
+```mathematica
+(* Uses a 5x5 block radius with a delta of 2 *)
+binaryScan = ImageLinkAdaptiveThresholdMemory[img, 5, 2];
+```
+
+---
+
+## 3. Drawing & Annotations (In-Memory)
+
+Draw anti-aliased primitives natively on your image buffers. Colors are provided as normalized lists `(e.g., {R, G, B})`.
+
+### `ImageLinkDrawLineMemory`
+Draws a line segment between any two `(x, y)` float coordinates.
+```mathematica
+(* Draw a thick red line *)
+lineImg = ImageLinkDrawLineMemory[img, {10, 10}, {200, 200}, {1, 0, 0}];
+```
+
+### `ImageLinkDrawRectangleMemory`
+Draws a rectangle starting at integer coordinates `{x, y}` with `width` and `height`.
+```mathematica
+(* Draw a hollow green bounding box *)
+hollowRect = ImageLinkDrawRectangleMemory[img, {50, 50, 100, 150}, {0, 1, 0}];
+
+(* Draw a solid filled blue box *)
+filledRect = ImageLinkDrawRectangleMemory[img, {100, 100, 50, 50}, {0, 0, 1}, Filled -> True];
+```
+
+### `ImageLinkDrawCircleMemory` & `ImageLinkDrawEllipseMemory`
+Draws hollow or filled circles and ellipses.
+```mathematica
+(* Draw a solid green circle of radius 50 at {250, 150} *)
+circleImg = ImageLinkDrawCircleMemory[img, {250, 150}, 50, {0, 1, 0}, Filled -> True];
+
+(* Draw a hollow blue ellipse at {150, 300} with radii {80, 40} *)
+ellipseImg = ImageLinkDrawEllipseMemory[img, {150, 300}, {80, 40}, {0, 0, 1}];
+```
+
+### `ImageLinkDrawPolygonMemory`
+Draws a hollow or filled polygon from a list of `{x, y}` coordinate pairs.
+```mathematica
+(* Draw a solid yellow polygon *)
+polyImg = ImageLinkDrawPolygonMemory[img, {{50, 50}, {150, 100}, {100, 200}, {20, 150}}, {1, 1, 0}, Filled -> True];
+```
+
+---
+
+## 4. File-Based Processing
 
 These functions process files directly. You provide an absolute or relative path to the input and output images. The Rust library will handle decoding the source and encoding the destination.
 
@@ -125,7 +212,7 @@ ImageLinkUnsharpen["input.png", "output.png", 1.5, 10]
 
 ---
 
-## 3. Metadata Utility Functions
+## 5. Metadata Utility Functions
 
 These functions quickly extract metadata directly from a file without loading the entire image into memory.
 
@@ -144,7 +231,7 @@ colorType = ImageLinkColorType["input.png"]
 
 ---
 
-## Versioning
+## 6. Versioning
 
 ### `ImageLinkVersion`
 Returns the current underlying version of the Rust dynamic library.

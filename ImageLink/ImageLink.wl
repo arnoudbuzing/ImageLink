@@ -31,6 +31,7 @@ ImageLinkDrawRectangleMemory::usage = "ImageLinkDrawRectangleMemory[image, {x, y
 ImageLinkDrawCircleMemory::usage = "ImageLinkDrawCircleMemory[image, {x, y}, radius, color, Filled -> False] draws a circle directly in memory."
 ImageLinkDrawEllipseMemory::usage = "ImageLinkDrawEllipseMemory[image, {x, y}, {rx, ry}, color, Filled -> False] draws an ellipse directly in memory."
 ImageLinkDrawPolygonMemory::usage = "ImageLinkDrawPolygonMemory[image, {{x1,y1}, {x2,y2}, ...}, color, Filled -> False] draws a polygon directly in memory."
+ImageLinkShrinkWidthMemory::usage = "ImageLinkShrinkWidthMemory[image, targetWidth] applies seam carving to shrink the image to the target width directly in memory."
 
 Begin["`Private`"]
 
@@ -67,6 +68,7 @@ imageLinkDrawRectMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_rect_memor
 imageLinkDrawCircleMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_circle_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, True|False}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 imageLinkDrawEllipseMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_ellipse_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, True|False}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 imageLinkDrawPolygonMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_polygon_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "Integer64"]}, {LibraryDataType[NumericArray, "Integer64"]}, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, True|False}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkShrinkWidthMemoryFunc = LibraryFunctionLoad[$LibraryFile, "shrink_width_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 
 ImageLinkVersion[] := imageLinkVersionFunc[]
 
@@ -315,6 +317,18 @@ ImageLinkDrawPolygonMemory[img_Image, points:{{_Integer, _Integer}..}, color_Lis
   res1d = imageLinkDrawPolygonMemoryFunc[na, pxNA, pyNA, colorNA, filled];
   
   Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkShrinkWidthMemory[img_Image, targetWidth_Integer] := Module[
+  {na, res1d, dims},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  
+  If[targetWidth >= dims[[2]], Return[img]];
+
+  res1d = imageLinkShrinkWidthMemoryFunc[na, targetWidth];
+  
+  Image[NumericArray[ArrayReshape[Normal[res1d], {dims[[1]], targetWidth, dims[[3]]}], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
 ]
 
 End[]

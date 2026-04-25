@@ -166,7 +166,20 @@ polyImg = ImageLinkDrawPolygonMemory[img, {{50, 50}, {150, 100}, {100, 200}, {20
 
 ---
 
-## 4. File-Based Processing
+## 4. Seam Carving (Content-Aware Scaling)
+
+Seam carving allows you to shrink an image's dimensions while preserving its most important features, dynamically removing the "least noticeable" paths (seams) of pixels.
+
+### `ImageLinkShrinkWidthMemory`
+Shrinks the width of the image to the specified target width.
+```mathematica
+(* Shrink the image width to 500 pixels *)
+shrunkImg = ImageLinkShrinkWidthMemory[img, 500];
+```
+
+---
+
+## 5. File-Based Processing
 
 These functions process files directly. You provide an absolute or relative path to the input and output images. The Rust library will handle decoding the source and encoding the destination.
 

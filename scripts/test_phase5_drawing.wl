@@ -1,5 +1,5 @@
 PacletDirectoryLoad[FileNameJoin[{Directory[], "ImageLink"}]];
-Needs["ImageLink`"]
+Needs["ArnoudBuzing`ImageLink`"]
 
 img = Import["/Users/arnoudb/stash/image/scripts/dog.jpg"];
 

@@ -1,5 +1,5 @@
 PacletDirectoryLoad[FileNameJoin[{Directory[], "ImageLink"}]];
-Needs["ImageLink`"]
+Needs["ArnoudBuzing`ImageLink`"]
 
 Export["input.png", RandomImage[1, {100, 100}]];
 

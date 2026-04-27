@@ -1,5 +1,5 @@
 PacletDirectoryAdd[Directory[]]
-Needs["ImageLink`"]
+Needs["ArnoudBuzing`ImageLink`"]
 
 VerificationTest[
     StringQ[ImageLinkVersion[]],

@@ -1,5 +1,5 @@
 PacletDirectoryAdd[Directory[]]
-Needs["ImageLink`"]
+Needs["ArnoudBuzing`ImageLink`"]
 
 $Blank = Image[ConstantArray[0, {100, 100, 3}], "Byte"];
 

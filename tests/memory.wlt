@@ -1,5 +1,5 @@
 PacletDirectoryAdd[Directory[]]
-Needs["ImageLink`"]
+Needs["ArnoudBuzing`ImageLink`"]
 
 $TestImage = Image[RandomReal[1, {100, 100, 3}], "Real"];
 $TestImageByte = Image[$TestImage, "Byte"];

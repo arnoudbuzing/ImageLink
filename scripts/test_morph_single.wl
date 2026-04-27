@@ -1,5 +1,5 @@
 PacletDirectoryLoad[FileNameJoin[{Directory[], "ImageLink"}]];
-Needs["ImageLink`"]
+Needs["ArnoudBuzing`ImageLink`"]
 
 (* Create a 10x10 completely black image *)
 data = ConstantArray[{0., 0., 0.}, {10, 10}];

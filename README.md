@@ -12,7 +12,7 @@ Before using the functions, make sure to load the paclet:
 
 ```mathematica
 PacletDirectoryLoad["/path/to/ImageLink"];
-Needs["ImageLink`"];
+Needs["ArnoudBuzing`ImageLink`"];
 ```
 
 ---

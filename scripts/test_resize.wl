@@ -1,6 +1,6 @@
 $ScriptDir = DirectoryName[$InputFileName];
 PacletDirectoryLoad[ParentDirectory[$ScriptDir]];
-Needs["ImageLink`"]
+Needs["ArnoudBuzing`ImageLink`"]
 
 inputPath = FileNameJoin[{$ScriptDir, "input.png"}];
 outputPath = FileNameJoin[{$ScriptDir, "output.png"}];

@@ -1,5 +1,5 @@
 PacletDirectoryLoad[FileNameJoin[{Directory[], "ImageLink"}]];
-Needs["ImageLink`"]
+Needs["ArnoudBuzing`ImageLink`"]
 
 img = RandomImage[1, {100, 100}, ColorSpace -> "RGB"];
 Print["Original Dimensions: ", ImageDimensions[img]];

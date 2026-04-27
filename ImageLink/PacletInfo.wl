@@ -1,22 +1,20 @@
 PacletObject[
   <|
-    "Name" -> "ImageLink",
-    "Description" -> "LibraryLink connection to Rust image crate",
-    "Creator" -> "Antigravity",
-    "License" -> "MIT",
-    "PublisherID" -> "Antigravity",
+    "Name" -> "ArnoudBuzing/ImageLink",
+    "Description" -> "Image Processing Functions for the Wolfram Language",
+    "PublisherID" -> "ArnoudBuzing",
+    "Creator" -> "Arnoud Buzing",
     "Version" -> "1.0.0",
-    "WolframVersion" -> "14.0+",
-    "PrimaryContext" -> "ImageLink`",
+    "WolframVersion" -> "14.3+",
+    "License" -> "MIT",
+    "PrimaryContext" -> "ArnoudBuzing`ImageLink`",
     "Extensions" -> {
       {
         "Kernel",
         "Root" -> ".",
-        "Context" -> {"ImageLink`"}
+        "Context" -> {"ArnoudBuzing`ImageLink`"}
       },
-      {
-        "LibraryLink"
-      }
+      {"LibraryLink"}
     }
   |>
 ]

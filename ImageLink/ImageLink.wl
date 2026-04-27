@@ -1,4 +1,4 @@
-BeginPackage["ImageLink`"]
+BeginPackage["ArnoudBuzing`ImageLink`"]
 
 ImageLinkVersion::usage = "ImageLinkVersion[] returns the version string of the Rust library."
 ImageLinkResize::usage = "ImageLinkResize[input, output, {width, height}, Method -> \"Triangle\"] resizes an image and saves it."

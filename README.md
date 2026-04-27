@@ -225,7 +225,7 @@ ImageLinkUnsharpen["input.png", "output.png", 1.5, 10]
 
 ---
 
-## 5. Metadata Utility Functions
+## 6. Metadata Utility Functions
 
 These functions quickly extract metadata directly from a file without loading the entire image into memory.
 
@@ -244,7 +244,7 @@ colorType = ImageLinkColorType["input.png"]
 
 ---
 
-## 6. Versioning
+## 7. Versioning
 
 ### `ImageLinkVersion`
 Returns the current underlying version of the Rust dynamic library.
@@ -252,3 +252,29 @@ Returns the current underlying version of the Rust dynamic library.
 version = ImageLinkVersion[]
 (* Returns: "0.1.0" *)
 ```
+---
+
+## 8. Development & Testing
+
+### Running Unit Tests
+The project includes a comprehensive suite of unit tests. To run the full test report:
+
+```bash
+/Applications/Wolfram/15.0/Wolfram.app/Contents/MacOS/wolfram -script scripts/report.wl
+```
+
+This will execute all `.wlt` files in the `tests/` directory and display a summary of results.
+
+### Building from Source
+To build the Rust LibraryLink extension:
+
+1. Ensure you have [Rust](https://rustup.rs/) installed.
+2. Navigate to the `rust/` directory.
+3. Run the build command:
+   ```bash
+   cargo build --release
+   ```
+4. Copy the compiled library to the paclet resources:
+   ```bash
+   cp target/release/librust.dylib ../ImageLink/LibraryResources/MacOSX-ARM64/
+   ```

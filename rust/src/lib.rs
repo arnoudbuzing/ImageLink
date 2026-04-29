@@ -1,5 +1,6 @@
 use wolfram_library_link::export;
 use image::imageops::FilterType;
+use ab_glyph::{Font, FontRef, PxScale};
 
 #[export]
 fn get_version() -> String {
@@ -937,5 +938,126 @@ fn shrink_width_memory(array: &NumericArray<u8>, target_width: i64) -> NumericAr
         let img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
         let shrunk = imageproc::seam_carving::shrink_width(&img, target_width as u32);
         NumericArray::<u8>::from_slice(shrunk.as_raw())
+    }
+}
+
+#[export]
+fn flood_fill_memory(array: &NumericArray<u8>, x: i64, y: i64, color_array: &NumericArray<u8>) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 { return NumericArray::<u8>::from_slice(array.as_slice()); }
+    let (h, w, channels) = (dims[0] as u32, dims[1] as u32, dims[2] as u32);
+    let slice = array.as_slice();
+    let color_slice = color_array.as_slice();
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 3 { Rgb([color_slice[0], color_slice[1], color_slice[2]]) } else { Rgb([255, 255, 255]) };
+        imageproc::drawing::flood_fill_mut(&mut img, x as u32, y as u32, c);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 4 { Rgba([color_slice[0], color_slice[1], color_slice[2], color_slice[3]]) } else if color_slice.len() >= 3 { Rgba([color_slice[0], color_slice[1], color_slice[2], 255]) } else { Rgba([255, 255, 255, 255]) };
+        imageproc::drawing::flood_fill_mut(&mut img, x as u32, y as u32, c);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else {
+        let mut img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if !color_slice.is_empty() { image::Luma([color_slice[0]]) } else { image::Luma([255]) };
+        imageproc::drawing::flood_fill_mut(&mut img, x as u32, y as u32, c);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    }
+}
+
+#[export]
+fn draw_antialiased_line_memory(array: &NumericArray<u8>, x1: i64, y1: i64, x2: i64, y2: i64, color_array: &NumericArray<u8>) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 { return NumericArray::<u8>::from_slice(array.as_slice()); }
+    let (h, w, channels) = (dims[0] as u32, dims[1] as u32, dims[2] as u32);
+    let slice = array.as_slice();
+    let color_slice = color_array.as_slice();
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 3 { Rgb([color_slice[0], color_slice[1], color_slice[2]]) } else { Rgb([255, 255, 255]) };
+        imageproc::drawing::draw_antialiased_line_segment_mut(&mut img, (x1 as i32, y1 as i32), (x2 as i32, y2 as i32), c, |p1, p2, alpha| {
+            imageproc::pixelops::interpolate(p1, p2, alpha)
+        });
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 4 { Rgba([color_slice[0], color_slice[1], color_slice[2], color_slice[3]]) } else if color_slice.len() >= 3 { Rgba([color_slice[0], color_slice[1], color_slice[2], 255]) } else { Rgba([255, 255, 255, 255]) };
+        imageproc::drawing::draw_antialiased_line_segment_mut(&mut img, (x1 as i32, y1 as i32), (x2 as i32, y2 as i32), c, |p1, p2, alpha| {
+            imageproc::pixelops::interpolate(p1, p2, alpha)
+        });
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else {
+        let mut img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if !color_slice.is_empty() { image::Luma([color_slice[0]]) } else { image::Luma([255]) };
+        imageproc::drawing::draw_antialiased_line_segment_mut(&mut img, (x1 as i32, y1 as i32), (x2 as i32, y2 as i32), c, |p1, p2, alpha| {
+            imageproc::pixelops::interpolate(p1, p2, alpha)
+        });
+        NumericArray::<u8>::from_slice(img.as_raw())
+    }
+}
+
+#[export]
+fn draw_bezier_memory(array: &NumericArray<u8>, x1: i64, y1: i64, x2: i64, y2: i64, x3: i64, y3: i64, x4: i64, y4: i64, color_array: &NumericArray<u8>) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 { return NumericArray::<u8>::from_slice(array.as_slice()); }
+    let (h, w, channels) = (dims[0] as u32, dims[1] as u32, dims[2] as u32);
+    let slice = array.as_slice();
+    let color_slice = color_array.as_slice();
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 3 { Rgb([color_slice[0], color_slice[1], color_slice[2]]) } else { Rgb([255, 255, 255]) };
+        imageproc::drawing::draw_cubic_bezier_curve_mut(&mut img, (x1 as f32, y1 as f32), (x4 as f32, y4 as f32), (x2 as f32, y2 as f32), (x3 as f32, y3 as f32), c);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 4 { Rgba([color_slice[0], color_slice[1], color_slice[2], color_slice[3]]) } else if color_slice.len() >= 3 { Rgba([color_slice[0], color_slice[1], color_slice[2], 255]) } else { Rgba([255, 255, 255, 255]) };
+        imageproc::drawing::draw_cubic_bezier_curve_mut(&mut img, (x1 as f32, y1 as f32), (x4 as f32, y4 as f32), (x2 as f32, y2 as f32), (x3 as f32, y3 as f32), c);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else {
+        let mut img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if !color_slice.is_empty() { image::Luma([color_slice[0]]) } else { image::Luma([255]) };
+        imageproc::drawing::draw_cubic_bezier_curve_mut(&mut img, (x1 as f32, y1 as f32), (x4 as f32, y4 as f32), (x2 as f32, y2 as f32), (x3 as f32, y3 as f32), c);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    }
+}
+
+#[export]
+fn draw_text_memory(array: &NumericArray<u8>, x: i64, y: i64, scale: f64, font_path: String, text: String, color_array: &NumericArray<u8>) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 { return NumericArray::<u8>::from_slice(array.as_slice()); }
+    let (h, w, channels) = (dims[0] as u32, dims[1] as u32, dims[2] as u32);
+    let slice = array.as_slice();
+    let color_slice = color_array.as_slice();
+
+    let font_data = match std::fs::read(&font_path) {
+        Ok(data) => data,
+        Err(_) => return NumericArray::<u8>::from_slice(slice),
+    };
+    let font = match FontRef::try_from_slice(&font_data) {
+        Ok(f) => f,
+        Err(_) => return NumericArray::<u8>::from_slice(slice),
+    };
+
+    let px_scale = PxScale::from(scale as f32);
+
+    if channels == 3 {
+        let mut img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 3 { Rgb([color_slice[0], color_slice[1], color_slice[2]]) } else { Rgb([255, 255, 255]) };
+        imageproc::drawing::draw_text_mut(&mut img, c, x as i32, y as i32, px_scale, &font, &text);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else if channels == 4 {
+        let mut img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if color_slice.len() >= 4 { Rgba([color_slice[0], color_slice[1], color_slice[2], color_slice[3]]) } else if color_slice.len() >= 3 { Rgba([color_slice[0], color_slice[1], color_slice[2], 255]) } else { Rgba([255, 255, 255, 255]) };
+        imageproc::drawing::draw_text_mut(&mut img, c, x as i32, y as i32, px_scale, &font, &text);
+        NumericArray::<u8>::from_slice(img.as_raw())
+    } else {
+        let mut img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let c = if !color_slice.is_empty() { image::Luma([color_slice[0]]) } else { image::Luma([255]) };
+        imageproc::drawing::draw_text_mut(&mut img, c, x as i32, y as i32, px_scale, &font, &text);
+        NumericArray::<u8>::from_slice(img.as_raw())
     }
 }

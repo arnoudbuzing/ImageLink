@@ -32,10 +32,14 @@ ImageLinkDrawCircleMemory::usage = "ImageLinkDrawCircleMemory[image, {x, y}, rad
 ImageLinkDrawEllipseMemory::usage = "ImageLinkDrawEllipseMemory[image, {x, y}, {rx, ry}, color, Filled -> False] draws an ellipse directly in memory."
 ImageLinkDrawPolygonMemory::usage = "ImageLinkDrawPolygonMemory[image, {{x1,y1}, {x2,y2}, ...}, color, Filled -> False] draws a polygon directly in memory."
 ImageLinkShrinkWidthMemory::usage = "ImageLinkShrinkWidthMemory[image, targetWidth] applies seam carving to shrink the image to the target width directly in memory."
+ImageLinkDrawTextMemory::usage = "ImageLinkDrawTextMemory[image, text, {x, y}, scale, fontPath, color] draws text directly in memory."
+ImageLinkFloodFillMemory::usage = "ImageLinkFloodFillMemory[image, {x, y}, color] performs a flood fill directly in memory."
+ImageLinkDrawAntialiasedLineMemory::usage = "ImageLinkDrawAntialiasedLineMemory[image, {x1, y1}, {x2, y2}, color] draws an anti-aliased line segment directly in memory."
+ImageLinkDrawBezierMemory::usage = "ImageLinkDrawBezierMemory[image, {p1, p2, p3, p4}, color] draws a cubic Bezier curve directly in memory."
 
 Begin["`Private`"]
 
-$LibraryFile = FindLibrary["librust"];
+$LibraryFile = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust.dylib"}];
 
 imageLinkVersionFunc = LibraryFunctionLoad[$LibraryFile, "get_version", {}, "UTF8String"];
 imageLinkResizeFunc = LibraryFunctionLoad[$LibraryFile, "resize_image", {"UTF8String", "UTF8String", Integer, Integer, "UTF8String"}, "UTF8String"];
@@ -69,6 +73,10 @@ imageLinkDrawCircleMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_circle_m
 imageLinkDrawEllipseMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_ellipse_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, True|False}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 imageLinkDrawPolygonMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_polygon_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "Integer64"]}, {LibraryDataType[NumericArray, "Integer64"]}, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, True|False}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 imageLinkShrinkWidthMemoryFunc = LibraryFunctionLoad[$LibraryFile, "shrink_width_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkDrawTextMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_text_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Real, "UTF8String", "UTF8String", {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkFloodFillMemoryFunc = LibraryFunctionLoad[$LibraryFile, "flood_fill_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkDrawAALineMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_antialiased_line_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkDrawBezierMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_bezier_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 
 ImageLinkVersion[] := imageLinkVersionFunc[]
 
@@ -329,6 +337,42 @@ ImageLinkShrinkWidthMemory[img_Image, targetWidth_Integer] := Module[
   res1d = imageLinkShrinkWidthMemoryFunc[na, targetWidth];
   
   Image[NumericArray[ArrayReshape[Normal[res1d], {dims[[1]], targetWidth, dims[[3]]}], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkDrawTextMemory[img_Image, text_String, {x_Integer, y_Integer}, scale_?NumericQ, fontPath_String, color_List] := Module[
+  {na, res1d, dims, colorNA},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  colorNA = NumericArray[Round[color * 255], "UnsignedInteger8"];
+  res1d = imageLinkDrawTextMemoryFunc[na, x, y, N[scale], ExpandFileName[fontPath], text, colorNA];
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkFloodFillMemory[img_Image, {x_Integer, y_Integer}, color_List] := Module[
+  {na, res1d, dims, colorNA},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  colorNA = NumericArray[Round[color * 255], "UnsignedInteger8"];
+  res1d = imageLinkFloodFillMemoryFunc[na, x, y, colorNA];
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkDrawAntialiasedLineMemory[img_Image, {x1_Integer, y1_Integer}, {x2_Integer, y2_Integer}, color_List] := Module[
+  {na, res1d, dims, colorNA},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  colorNA = NumericArray[Round[color * 255], "UnsignedInteger8"];
+  res1d = imageLinkDrawAALineMemoryFunc[na, x1, y1, x2, y2, colorNA];
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkDrawBezierMemory[img_Image, {{x1_, y1_}, {x2_, y2_}, {x3_, y3_}, {x4_, y4_}}, color_List] := Module[
+  {na, res1d, dims, colorNA},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  colorNA = NumericArray[Round[color * 255], "UnsignedInteger8"];
+  res1d = imageLinkDrawBezierMemoryFunc[na, Round[x1], Round[y1], Round[x2], Round[y2], Round[x3], Round[y3], Round[x4], Round[y4], colorNA];
+  Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
 ]
 
 End[]

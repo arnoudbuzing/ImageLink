@@ -36,10 +36,15 @@ ImageLinkDrawTextMemory::usage = "ImageLinkDrawTextMemory[image, text, {x, y}, s
 ImageLinkFloodFillMemory::usage = "ImageLinkFloodFillMemory[image, {x, y}, color] performs a flood fill directly in memory."
 ImageLinkDrawAntialiasedLineMemory::usage = "ImageLinkDrawAntialiasedLineMemory[image, {x1, y1}, {x2, y2}, color] draws an anti-aliased line segment directly in memory."
 ImageLinkDrawBezierMemory::usage = "ImageLinkDrawBezierMemory[image, {p1, p2, p3, p4}, color] draws a cubic Bezier curve directly in memory."
+ImageLinkHistogramMemory::usage = "ImageLinkHistogramMemory[image] returns a list of histograms (one per channel) for the image."
+ImageLinkPSNRMemory::usage = "ImageLinkPSNRMemory[image1, image2] returns the Peak Signal-to-Noise Ratio between two images."
+ImageLinkPHashMemory::usage = "ImageLinkPHashMemory[image] returns a 64-bit perceptual hash of the image."
+ImageLinkOtsuLevelMemory::usage = "ImageLinkOtsuLevelMemory[image] returns the optimal threshold level using Otsu's method."
 
 Begin["`Private`"]
 
 $LibraryFile = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust.dylib"}];
+$LibraryFileStats = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_stats.dylib"}];
 
 imageLinkVersionFunc = LibraryFunctionLoad[$LibraryFile, "get_version", {}, "UTF8String"];
 imageLinkResizeFunc = LibraryFunctionLoad[$LibraryFile, "resize_image", {"UTF8String", "UTF8String", Integer, Integer, "UTF8String"}, "UTF8String"];
@@ -77,6 +82,10 @@ imageLinkDrawTextMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_text_memor
 imageLinkFloodFillMemoryFunc = LibraryFunctionLoad[$LibraryFile, "flood_fill_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 imageLinkDrawAALineMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_antialiased_line_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 imageLinkDrawBezierMemoryFunc = LibraryFunctionLoad[$LibraryFile, "draw_bezier_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkHistogramMemoryFunc = LibraryFunctionLoad[$LibraryFileStats, "histogram_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger32"]];
+imageLinkPSNRMemoryFunc = LibraryFunctionLoad[$LibraryFileStats, "psnr_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, Real];
+imageLinkPHashMemoryFunc = LibraryFunctionLoad[$LibraryFileStats, "phash_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, Integer];
+imageLinkOtsuLevelMemoryFunc = LibraryFunctionLoad[$LibraryFileStats, "otsu_level_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, Integer];
 
 ImageLinkVersion[] := imageLinkVersionFunc[]
 
@@ -373,6 +382,34 @@ ImageLinkDrawBezierMemory[img_Image, {{x1_, y1_}, {x2_, y2_}, {x3_, y3_}, {x4_, 
   colorNA = NumericArray[Round[color * 255], "UnsignedInteger8"];
   res1d = imageLinkDrawBezierMemoryFunc[na, Round[x1], Round[y1], Round[x2], Round[y2], Round[x3], Round[y3], Round[x4], Round[y4], colorNA];
   Image[NumericArray[ArrayReshape[Normal[res1d], dims], "UnsignedInteger8"], "Byte", ColorSpace -> ImageColorSpace[img]]
+]
+
+ImageLinkHistogramMemory[img_Image] := Module[
+  {na, res1d, dims, channels},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  dims = Dimensions[na];
+  channels = dims[[3]];
+  res1d = imageLinkHistogramMemoryFunc[na];
+  ArrayReshape[Normal[res1d], {channels, 256}]
+]
+
+ImageLinkPSNRMemory[img1_Image, img2_Image] := Module[
+  {na1, na2},
+  na1 = NumericArray[ImageData[img1, "Byte"], "UnsignedInteger8"];
+  na2 = NumericArray[ImageData[img2, "Byte"], "UnsignedInteger8"];
+  imageLinkPSNRMemoryFunc[na1, na2]
+]
+
+ImageLinkPHashMemory[img_Image] := Module[
+  {na},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  imageLinkPHashMemoryFunc[na]
+]
+
+ImageLinkOtsuLevelMemory[img_Image] := Module[
+  {na},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  imageLinkOtsuLevelMemoryFunc[na]
 ]
 
 End[]

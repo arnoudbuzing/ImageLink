@@ -3,8 +3,10 @@ use image::{ImageBuffer, Rgb, Rgba};
 
 fn to_luma(array: &NumericArray<u8>) -> Option<ImageBuffer<image::Luma<u8>, Vec<u8>>> {
     let dims = array.dimensions();
-    if dims.len() < 3 { return None; }
-    let (h, w, ch) = (dims[0] as u32, dims[1] as u32, dims[2] as u32);
+    if dims.len() < 2 { return None; }
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let ch = if dims.len() == 3 { dims[2] as u32 } else { 1 };
     let s = array.as_slice().to_vec();
     Some(if ch == 3 {
         let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, s)?;
@@ -26,8 +28,10 @@ fn stats_get_version() -> String {
 #[export]
 fn histogram_memory(array: &NumericArray<u8>) -> NumericArray<u32> {
     let dims = array.dimensions();
-    if dims.len() < 3 { return NumericArray::<u32>::from_slice(&[0u32; 256]); }
-    let (h, w, channels) = (dims[0] as u32, dims[1] as u32, dims[2] as u32);
+    if dims.len() < 2 { return NumericArray::<u32>::from_slice(&[0u32; 256]); }
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = if dims.len() == 3 { dims[2] as u32 } else { 1 };
     let slice = array.as_slice();
     let mut result: Vec<u32> = Vec::with_capacity((channels as usize) * 256);
     if channels == 3 {
@@ -54,8 +58,10 @@ fn histogram_memory(array: &NumericArray<u8>) -> NumericArray<u32> {
 fn psnr_memory(array1: &NumericArray<u8>, array2: &NumericArray<u8>) -> f64 {
     let d1 = array1.dimensions();
     let d2 = array2.dimensions();
-    if d1 != d2 || d1.len() < 3 { return 0.0; }
-    let (h, w, ch) = (d1[0] as u32, d1[1] as u32, d1[2] as u32);
+    if d1 != d2 || d1.len() < 2 { return 0.0; }
+    let h = d1[0] as u32;
+    let w = d1[1] as u32;
+    let ch = if d1.len() == 3 { d1[2] as u32 } else { 1 };
     if ch == 3 {
         let i1 = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, array1.as_slice().to_vec()).unwrap();
         let i2 = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, array2.as_slice().to_vec()).unwrap();
@@ -90,5 +96,29 @@ fn otsu_level_memory(array: &NumericArray<u8>) -> i64 {
     match to_luma(array) {
         Some(luma) => imageproc::contrast::otsu_level(&luma) as i64,
         None => 0,
+    }
+}
+
+#[export]
+fn kapur_level_memory(array: &NumericArray<u8>) -> i64 {
+    match to_luma(array) {
+        Some(luma) => imageproc::contrast::kapur_level(&luma) as i64,
+        None => 0,
+    }
+}
+
+#[export]
+fn match_histogram_memory(array1: &NumericArray<u8>, array2: &NumericArray<u8>) -> NumericArray<u8> {
+    let d1 = array1.dimensions();
+    let d2 = array2.dimensions();
+    if d1.len() < 2 || d2.len() < 2 {
+        return NumericArray::<u8>::from_slice(&[]);
+    }
+    
+    if let (Some(luma1), Some(luma2)) = (to_luma(array1), to_luma(array2)) {
+        let res = imageproc::contrast::match_histogram(&luma1, &luma2);
+        NumericArray::<u8>::from_array(&[d1[0], d1[1], 1], &res.into_raw())
+    } else {
+        NumericArray::<u8>::from_slice(&[])
     }
 }

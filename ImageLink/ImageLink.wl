@@ -31,7 +31,14 @@ ImageLinkDrawRectangleMemory::usage = "ImageLinkDrawRectangleMemory[image, {x, y
 ImageLinkDrawCircleMemory::usage = "ImageLinkDrawCircleMemory[image, {x, y}, radius, color, Filled -> False] draws a circle directly in memory."
 ImageLinkDrawEllipseMemory::usage = "ImageLinkDrawEllipseMemory[image, {x, y}, {rx, ry}, color, Filled -> False] draws an ellipse directly in memory."
 ImageLinkDrawPolygonMemory::usage = "ImageLinkDrawPolygonMemory[image, {{x1,y1}, {x2,y2}, ...}, color, Filled -> False] draws a polygon directly in memory."
-ImageLinkShrinkWidthMemory::usage = "ImageLinkShrinkWidthMemory[image, targetWidth] applies seam carving to shrink the image to the target width directly in memory."
+ImageLinkShrinkWidthMemory::usage = "ImageLinkShrinkWidthMemory[img, targetWidth] shrinks the width of an image using seam carving.";
+ImageLinkHoughLinesMemory::usage = "ImageLinkHoughLinesMemory[img, voteThreshold, suppressionRadius] detects lines using the Hough transform.";
+ImageLinkMorphologyOpenMemory::usage = "ImageLinkMorphologyOpenMemory[img, norm, k] performs a morphological open operation.";
+ImageLinkMorphologyCloseMemory::usage = "ImageLinkMorphologyCloseMemory[img, norm, k] performs a morphological close operation.";
+ImageLinkRotateAboutCenterMemory::usage = "ImageLinkRotateAboutCenterMemory[img, theta, interpolation] rotates an image clockwise about its center by theta radians.";
+ImageLinkAffineMemory::usage = "ImageLinkAffineMemory[img, matrix, interpolation] applies an affine projection matrix (3x3) to an image.";
+ImageLinkKapurLevelMemory::usage = "ImageLinkKapurLevelMemory[img] computes Kapur's optimal threshold (0-255).";
+ImageLinkMatchHistogramMemory::usage = "ImageLinkMatchHistogramMemory[img, target] matches the histogram of img to the target image.";
 ImageLinkDrawTextMemory::usage = "ImageLinkDrawTextMemory[image, text, {x, y}, scale, fontPath, color] draws text directly in memory."
 ImageLinkFloodFillMemory::usage = "ImageLinkFloodFillMemory[image, {x, y}, color] performs a flood fill directly in memory."
 ImageLinkDrawAntialiasedLineMemory::usage = "ImageLinkDrawAntialiasedLineMemory[image, {x1, y1}, {x2, y2}, color] draws an anti-aliased line segment directly in memory."
@@ -43,9 +50,17 @@ ImageLinkOtsuLevelMemory::usage = "ImageLinkOtsuLevelMemory[image] returns the o
 
 Begin["`Private`"]
 
+$LibraryFile = FindLibrary["librust"];
+$LibraryFileDrawing = FindLibrary["librust_drawing"];
+$LibraryFileStats = FindLibrary["librust_stats"];
+$LibraryFileGeometry = FindLibrary["librust_geometry"];
+
+If[$LibraryFile === $Failed,
 $LibraryFile = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust.dylib"}];
 $LibraryFileStats = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_stats.dylib"}];
 $LibraryFileDrawing = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_drawing.dylib"}];
+$LibraryFileGeometry = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_geometry.dylib"}];
+];
 
 imageLinkVersionFunc = LibraryFunctionLoad[$LibraryFile, "get_version", {}, "UTF8String"];
 imageLinkResizeFunc = LibraryFunctionLoad[$LibraryFile, "resize_image", {"UTF8String", "UTF8String", Integer, Integer, "UTF8String"}, "UTF8String"];
@@ -87,6 +102,13 @@ imageLinkHistogramMemoryFunc = LibraryFunctionLoad[$LibraryFileStats, "histogram
 imageLinkPSNRMemoryFunc = LibraryFunctionLoad[$LibraryFileStats, "psnr_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, Real];
 imageLinkPHashMemoryFunc = LibraryFunctionLoad[$LibraryFileStats, "phash_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, Integer];
 imageLinkOtsuLevelMemoryFunc = LibraryFunctionLoad[$LibraryFileStats, "otsu_level_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, Integer];
+imageLinkKapurLevelMemoryFunc = LibraryFunctionLoad[$LibraryFileStats, "kapur_level_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, Integer];
+imageLinkMatchHistogramMemoryFunc = LibraryFunctionLoad[$LibraryFileStats, "match_histogram_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkHoughLinesMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "hough_lines_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer}, LibraryDataType[NumericArray, "Real64"]];
+imageLinkMorphologyOpenMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "morphology_open_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkMorphologyCloseMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "morphology_close_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkGeometryRotateAboutCenterMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_rotate_about_center_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Real, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkGeometryAffineMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_affine_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "Real64"]}, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 
 ImageLinkVersion[] := imageLinkVersionFunc[]
 
@@ -407,11 +429,48 @@ ImageLinkPHashMemory[img_Image] := Module[
   imageLinkPHashMemoryFunc[na]
 ]
 
-ImageLinkOtsuLevelMemory[img_Image] := Module[
-  {na},
-  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
-  imageLinkOtsuLevelMemoryFunc[na]
-]
+ImageLinkOtsuLevelMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  imageLinkOtsuLevelMemoryFunc[NumericArray[data, "UnsignedInteger8"]]
+];
+
+ImageLinkKapurLevelMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  imageLinkKapurLevelMemoryFunc[NumericArray[data, "UnsignedInteger8"]]
+];
+
+ImageLinkMatchHistogramMemory[img_Image, target_Image] := Module[{data, targetData},
+  data = ImageData[img, "Byte"];
+  targetData = ImageData[target, "Byte"];
+  Image[Normal[imageLinkMatchHistogramMemoryFunc[NumericArray[data, "UnsignedInteger8"], NumericArray[targetData, "UnsignedInteger8"]]], "Byte"]
+];
+
+ImageLinkHoughLinesMemory[img_Image, voteThreshold_Integer: 10, suppressionRadius_Integer: 8] := Module[{data, result},
+  data = ImageData[img, "Byte"];
+  result = imageLinkHoughLinesMemoryFunc[NumericArray[data, "UnsignedInteger8"], voteThreshold, suppressionRadius];
+  Normal[result]
+];
+
+ImageLinkMorphologyOpenMemory[img_Image, norm_Integer: 1, k_Integer: 1] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Image[Normal[imageLinkMorphologyOpenMemoryFunc[NumericArray[data, "UnsignedInteger8"], norm, k]], "Byte"]
+];
+
+ImageLinkMorphologyCloseMemory[img_Image, norm_Integer: 1, k_Integer: 1] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Image[Normal[imageLinkMorphologyCloseMemoryFunc[NumericArray[data, "UnsignedInteger8"], norm, k]], "Byte"]
+];
+
+ImageLinkRotateAboutCenterMemory[img_Image, theta_Real, interpolation_Integer: 2] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Image[Normal[imageLinkGeometryRotateAboutCenterMemoryFunc[NumericArray[data, "UnsignedInteger8"], theta, interpolation]], "Byte"]
+];
+
+ImageLinkAffineMemory[img_Image, matrix_?MatrixQ, interpolation_Integer: 2] := Module[{data, mat},
+  data = ImageData[img, "Byte"];
+  mat = NumericArray[matrix, "Real64"];
+  Image[Normal[imageLinkGeometryAffineMemoryFunc[NumericArray[data, "UnsignedInteger8"], mat, interpolation]], "Byte"]
+];
 
 End[]
 EndPackage[]

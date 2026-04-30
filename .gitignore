@@ -1,6 +1,5 @@
 # Rust build output
-rust/target/
-rust_stats/target/
+*/target/
 
 # OS X
 .DS_Store

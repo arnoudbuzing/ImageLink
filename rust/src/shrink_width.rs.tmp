@@ -1,0 +1,30 @@
+#[export]
+fn shrink_width_memory(array: &NumericArray<u8>, target_width: i64) -> NumericArray<u8> {
+    let dims = array.dimensions();
+    if dims.len() < 3 {
+        return NumericArray::<u8>::from_slice(array.as_slice());
+    }
+    
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = dims[2] as u32;
+    let slice = array.as_slice();
+
+    if target_width as u32 >= w {
+        return NumericArray::<u8>::from_slice(slice);
+    }
+
+    if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let shrunk = imageproc::seam_carving::shrink_width(&img, target_width as u32);
+        NumericArray::<u8>::from_slice(shrunk.as_raw())
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let shrunk = imageproc::seam_carving::shrink_width(&img, target_width as u32);
+        NumericArray::<u8>::from_slice(shrunk.as_raw())
+    } else {
+        let img = ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        let shrunk = imageproc::seam_carving::shrink_width(&img, target_width as u32);
+        NumericArray::<u8>::from_slice(shrunk.as_raw())
+    }
+}

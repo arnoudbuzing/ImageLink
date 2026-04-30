@@ -10,4 +10,3 @@ crate-type = ["cdylib"]
 image = "0.25"
 imageproc = "0.26.1"
 wolfram-library-link = "0.2.10"
-ab_glyph = "0.2"

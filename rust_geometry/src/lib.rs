@@ -189,3 +189,106 @@ fn geometry_affine_memory(array: &NumericArray<u8>, matrix: &NumericArray<f64>, 
         NumericArray::<u8>::from_array(dims, &res.into_raw())
     }
 }
+
+fn parse_points(array: &NumericArray<i64>) -> Vec<imageproc::point::Point<i32>> {
+    let slice = array.as_slice();
+    let mut points = Vec::with_capacity(slice.len() / 2);
+    for chunk in slice.chunks(2) {
+        if chunk.len() == 2 {
+            points.push(imageproc::point::Point::new(chunk[0] as i32, chunk[1] as i32));
+        }
+    }
+    points
+}
+
+fn encode_points(points: &[imageproc::point::Point<i32>]) -> NumericArray<i64> {
+    let mut res = Vec::with_capacity(points.len() * 2);
+    for p in points {
+        res.push(p.x as i64);
+        res.push(p.y as i64);
+    }
+    NumericArray::<i64>::from_array(&[points.len(), 2], &res)
+}
+
+#[export]
+fn geometry_find_contours_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArray<i64> {
+    let dims = array.dimensions();
+    if dims.len() < 2 {
+        return NumericArray::<i64>::from_slice(&[]);
+    }
+    let h = dims[0] as u32;
+    let w = dims[1] as u32;
+    let channels = if dims.len() == 3 { dims[2] as u32 } else { 1 };
+    let slice = array.as_slice();
+
+    let luma = if channels == 3 {
+        let img = ImageBuffer::<Rgb<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        image::imageops::grayscale(&img)
+    } else if channels == 4 {
+        let img = ImageBuffer::<Rgba<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap();
+        image::imageops::grayscale(&img)
+    } else {
+        ImageBuffer::<image::Luma<u8>, _>::from_raw(w, h, slice.to_vec()).unwrap()
+    };
+
+    let contours = imageproc::contours::find_contours_with_threshold::<u32>(&luma, threshold as u8);
+    let mut total_len = 1;
+    for c in &contours {
+        total_len += 3;
+        total_len += c.points.len() * 2;
+    }
+    let mut res = Vec::with_capacity(total_len);
+    res.push(contours.len() as i64);
+    for c in &contours {
+        res.push(c.points.len() as i64);
+        res.push(match c.border_type {
+            imageproc::contours::BorderType::Outer => 0,
+            imageproc::contours::BorderType::Hole => 1,
+        });
+        res.push(match c.parent {
+            Some(p) => p as i64,
+            None => -1,
+        });
+        for p in &c.points {
+            res.push(p.x as i64);
+            res.push(p.y as i64);
+        }
+    }
+    NumericArray::<i64>::from_slice(&res)
+}
+
+#[export]
+fn geometry_convex_hull_memory(points_array: &NumericArray<i64>) -> NumericArray<i64> {
+    let points = parse_points(points_array);
+    let hull = imageproc::geometry::convex_hull(points);
+    encode_points(&hull)
+}
+
+#[export]
+fn geometry_min_area_rect_memory(points_array: &NumericArray<i64>) -> NumericArray<i64> {
+    let points = parse_points(points_array);
+    let rect = imageproc::geometry::min_area_rect(&points);
+    
+    // Convert [Point<i32>; 4] to slice
+    let rect_slice = [rect[0], rect[1], rect[2], rect[3]];
+    encode_points(&rect_slice)
+}
+
+#[export]
+fn geometry_approximate_polygon_dp_memory(points_array: &NumericArray<i64>, epsilon: f64, closed: bool) -> NumericArray<i64> {
+    let points = parse_points(points_array);
+    let approx = imageproc::geometry::approximate_polygon_dp(&points, epsilon, closed);
+    encode_points(&approx)
+}
+
+#[export]
+fn geometry_arc_length_memory(points_array: &NumericArray<i64>, closed: bool) -> f64 {
+    let points = parse_points(points_array);
+    imageproc::geometry::arc_length(&points, closed)
+}
+
+#[export]
+fn geometry_contour_area_memory(points_array: &NumericArray<i64>) -> f64 {
+    let points = parse_points(points_array);
+    imageproc::geometry::contour_area(&points)
+}

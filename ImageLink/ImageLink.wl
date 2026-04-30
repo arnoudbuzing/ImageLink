@@ -39,6 +39,15 @@ ImageLinkRotateAboutCenterMemory::usage = "ImageLinkRotateAboutCenterMemory[img,
 ImageLinkAffineMemory::usage = "ImageLinkAffineMemory[img, matrix, interpolation] applies an affine projection matrix (3x3) to an image.";
 ImageLinkKapurLevelMemory::usage = "ImageLinkKapurLevelMemory[img] computes Kapur's optimal threshold (0-255).";
 ImageLinkMatchHistogramMemory::usage = "ImageLinkMatchHistogramMemory[img, target] matches the histogram of img to the target image.";
+ImageLinkCornersFast9Memory::usage = "ImageLinkCornersFast9Memory[img, threshold] detects corners using the FAST-9 algorithm.";
+ImageLinkMatchTemplateMemory::usage = "ImageLinkMatchTemplateMemory[img, template, method] performs template matching. Method: 1=SSE, 2=SSE Normalized, 3=CrossCorrelation, 4=CrossCorrelation Normalized.";
+ImageLinkDistanceTransformMemory::usage = "ImageLinkDistanceTransformMemory[img, norm] computes the distance transform using L1 (1) or LInf (2) norm.";
+ImageLinkFindContoursMemory::usage = "ImageLinkFindContoursMemory[img, threshold] returns a list of contours detected in the image.";
+ImageLinkConvexHullMemory::usage = "ImageLinkConvexHullMemory[points] computes the convex hull of a set of 2D points.";
+ImageLinkMinAreaRectMemory::usage = "ImageLinkMinAreaRectMemory[points] computes the minimum area bounding rectangle of a set of 2D points.";
+ImageLinkApproximatePolygonMemory::usage = "ImageLinkApproximatePolygonMemory[points, epsilon, closed] approximates a polygon.";
+ImageLinkArcLengthMemory::usage = "ImageLinkArcLengthMemory[points, closed] computes the arc length of a contour.";
+ImageLinkContourAreaMemory::usage = "ImageLinkContourAreaMemory[points] computes the area of a contour.";
 ImageLinkDrawTextMemory::usage = "ImageLinkDrawTextMemory[image, text, {x, y}, scale, fontPath, color] draws text directly in memory."
 ImageLinkFloodFillMemory::usage = "ImageLinkFloodFillMemory[image, {x, y}, color] performs a flood fill directly in memory."
 ImageLinkDrawAntialiasedLineMemory::usage = "ImageLinkDrawAntialiasedLineMemory[image, {x1, y1}, {x2, y2}, color] draws an anti-aliased line segment directly in memory."
@@ -59,6 +68,7 @@ If[$LibraryFile === $Failed,
 $LibraryFile = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust.dylib"}];
 $LibraryFileStats = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_stats.dylib"}];
 $LibraryFileDrawing = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_drawing.dylib"}];
+$LibraryFileVision = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_vision.dylib"}];
 $LibraryFileGeometry = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_geometry.dylib"}];
 ];
 
@@ -109,6 +119,17 @@ imageLinkMorphologyOpenMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "m
 imageLinkMorphologyCloseMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "morphology_close_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 imageLinkGeometryRotateAboutCenterMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_rotate_about_center_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Real, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 imageLinkGeometryAffineMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_affine_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "Real64"]}, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+
+imageLinkGeometryFindContoursMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_find_contours_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "Integer64"]];
+imageLinkGeometryConvexHullMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_convex_hull_memory", {{LibraryDataType[NumericArray, "Integer64"]}}, LibraryDataType[NumericArray, "Integer64"]];
+imageLinkGeometryMinAreaRectMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_min_area_rect_memory", {{LibraryDataType[NumericArray, "Integer64"]}}, LibraryDataType[NumericArray, "Integer64"]];
+imageLinkGeometryApproximatePolygonDpMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_approximate_polygon_dp_memory", {{LibraryDataType[NumericArray, "Integer64"]}, Real, "Boolean"}, LibraryDataType[NumericArray, "Integer64"]];
+imageLinkGeometryArcLengthMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_arc_length_memory", {{LibraryDataType[NumericArray, "Integer64"]}, "Boolean"}, Real];
+imageLinkGeometryContourAreaMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_contour_area_memory", {{LibraryDataType[NumericArray, "Integer64"]}}, Real];
+
+imageLinkCornersFast9MemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "corners_fast9_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "Integer64"]];
+imageLinkMatchTemplateMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "match_template_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "Real64"]];
+imageLinkDistanceTransformMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "distance_transform_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
 
 ImageLinkVersion[] := imageLinkVersionFunc[]
 
@@ -471,6 +492,75 @@ ImageLinkAffineMemory[img_Image, matrix_?MatrixQ, interpolation_Integer: 2] := M
   mat = NumericArray[matrix, "Real64"];
   Image[Normal[imageLinkGeometryAffineMemoryFunc[NumericArray[data, "UnsignedInteger8"], mat, interpolation]], "Byte"]
 ];
+
+ImageLinkCornersFast9Memory[img_Image, threshold_Integer: 10] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkCornersFast9MemoryFunc[NumericArray[data, "UnsignedInteger8"], threshold]]
+];
+
+ImageLinkMatchTemplateMemory[img_Image, template_Image, method_Integer: 4] := Module[{data, targetData},
+  data = ImageData[img, "Byte"];
+  targetData = ImageData[template, "Byte"];
+  Image[Normal[imageLinkMatchTemplateMemoryFunc[NumericArray[data, "UnsignedInteger8"], NumericArray[targetData, "UnsignedInteger8"], method]]]
+];
+
+ImageLinkDistanceTransformMemory[img_Image, norm_Integer: 1] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Image[Normal[imageLinkDistanceTransformMemoryFunc[NumericArray[data, "UnsignedInteger8"], norm]], "Byte"]
+];
+
+ImageLinkFindContoursMemory[img_Image, threshold_Integer] := Module[
+  {na, res, numContours, idx, contours, pLen, bType, pIdx, pts},
+  na = NumericArray[ImageData[img, "Byte"], "UnsignedInteger8"];
+  res = Normal[imageLinkGeometryFindContoursMemoryFunc[na, threshold]];
+  If[Length[res] == 0, Return[{}]];
+  numContours = res[[1]];
+  idx = 2;
+  contours = Table[
+    pLen = res[[idx]];
+    bType = If[res[[idx+1]] == 0, "Outer", "Hole"];
+    pIdx = res[[idx+2]];
+    idx += 3;
+    pts = Partition[res[[idx ;; idx + pLen * 2 - 1]], 2];
+    idx += pLen * 2;
+    <|"Points" -> pts, "BorderType" -> bType, "Parent" -> pIdx|>,
+    {i, 1, numContours}
+  ];
+  contours
+]
+
+ImageLinkConvexHullMemory[points_List] := Module[
+  {na, res},
+  na = NumericArray[Flatten[points], "Integer64"];
+  res = Normal[imageLinkGeometryConvexHullMemoryFunc[na]];
+  Partition[res, 2]
+]
+
+ImageLinkMinAreaRectMemory[points_List] := Module[
+  {na, res},
+  na = NumericArray[Flatten[points], "Integer64"];
+  res = Normal[imageLinkGeometryMinAreaRectMemoryFunc[na]];
+  Partition[res, 2]
+]
+
+ImageLinkApproximatePolygonMemory[points_List, epsilon_?NumericQ, closed:(True|False):True] := Module[
+  {na, res},
+  na = NumericArray[Flatten[points], "Integer64"];
+  res = Normal[imageLinkGeometryApproximatePolygonDpMemoryFunc[na, N[epsilon], closed]];
+  Partition[res, 2]
+]
+
+ImageLinkArcLengthMemory[points_List, closed:(True|False):True] := Module[
+  {na},
+  na = NumericArray[Flatten[points], "Integer64"];
+  imageLinkGeometryArcLengthMemoryFunc[na, closed]
+]
+
+ImageLinkContourAreaMemory[points_List] := Module[
+  {na},
+  na = NumericArray[Flatten[points], "Integer64"];
+  imageLinkGeometryContourAreaMemoryFunc[na]
+]
 
 End[]
 EndPackage[]

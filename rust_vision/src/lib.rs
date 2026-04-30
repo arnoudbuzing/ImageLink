@@ -85,3 +85,211 @@ fn distance_transform_memory(array: &NumericArray<u8>, norm: i64) -> NumericArra
         None => NumericArray::<u8>::from_slice(&[])
     }
 }
+
+#[export]
+fn sobel_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
+    match to_luma(array) {
+        Some(luma) => {
+            let res = imageproc::gradients::sobel_gradients(&luma);
+            let h = res.height() as usize;
+            let w = res.width() as usize;
+            NumericArray::<u16>::from_array(&[h, w, 1], &res.into_raw())
+        },
+        None => NumericArray::<u16>::from_slice(&[])
+    }
+}
+
+#[export]
+fn prewitt_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
+    match to_luma(array) {
+        Some(luma) => {
+            let res = imageproc::gradients::prewitt_gradients(&luma);
+            let h = res.height() as usize;
+            let w = res.width() as usize;
+            NumericArray::<u16>::from_array(&[h, w, 1], &res.into_raw())
+        },
+        None => NumericArray::<u16>::from_slice(&[])
+    }
+}
+
+#[export]
+fn horizontal_sobel_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+    match to_luma(array) {
+        Some(luma) => {
+            let res = imageproc::gradients::horizontal_sobel(&luma);
+            let h = res.height() as usize;
+            let w = res.width() as usize;
+            NumericArray::<i16>::from_array(&[h, w, 1], &res.into_raw())
+        },
+        None => NumericArray::<i16>::from_slice(&[])
+    }
+}
+
+#[export]
+fn vertical_sobel_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+    match to_luma(array) {
+        Some(luma) => {
+            let res = imageproc::gradients::vertical_sobel(&luma);
+            let h = res.height() as usize;
+            let w = res.width() as usize;
+            NumericArray::<i16>::from_array(&[h, w, 1], &res.into_raw())
+        },
+        None => NumericArray::<i16>::from_slice(&[])
+    }
+}
+
+#[export]
+fn horizontal_prewitt_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+    match to_luma(array) {
+        Some(luma) => {
+            let res = imageproc::gradients::horizontal_prewitt(&luma);
+            let h = res.height() as usize;
+            let w = res.width() as usize;
+            NumericArray::<i16>::from_array(&[h, w, 1], &res.into_raw())
+        },
+        None => NumericArray::<i16>::from_slice(&[])
+    }
+}
+
+#[export]
+fn vertical_prewitt_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+    match to_luma(array) {
+        Some(luma) => {
+            let res = imageproc::gradients::vertical_prewitt(&luma);
+            let h = res.height() as usize;
+            let w = res.width() as usize;
+            NumericArray::<i16>::from_array(&[h, w, 1], &res.into_raw())
+        },
+        None => NumericArray::<i16>::from_slice(&[])
+    }
+}
+
+#[export]
+fn horizontal_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+    match to_luma(array) {
+        Some(luma) => {
+            let res = imageproc::gradients::horizontal_scharr(&luma);
+            let h = res.height() as usize;
+            let w = res.width() as usize;
+            NumericArray::<i16>::from_array(&[h, w, 1], &res.into_raw())
+        },
+        None => NumericArray::<i16>::from_slice(&[])
+    }
+}
+
+#[export]
+fn vertical_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+    match to_luma(array) {
+        Some(luma) => {
+            let res = imageproc::gradients::vertical_scharr(&luma);
+            let h = res.height() as usize;
+            let w = res.width() as usize;
+            NumericArray::<i16>::from_array(&[h, w, 1], &res.into_raw())
+        },
+        None => NumericArray::<i16>::from_slice(&[])
+    }
+}
+
+#[export]
+fn corners_fast12_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArray<i64> {
+    match to_luma(array) {
+        Some(luma) => {
+            let corners = imageproc::corners::corners_fast12(&luma, threshold as u8);
+            let mut res = Vec::with_capacity(corners.len() * 2);
+            for c in corners {
+                res.push(c.x as i64);
+                res.push(c.y as i64);
+            }
+            NumericArray::<i64>::from_array(&[res.len() / 2, 2], &res)
+        },
+        None => NumericArray::<i64>::from_slice(&[])
+    }
+}
+
+#[export]
+fn connected_components_memory(array: &NumericArray<u8>, connectivity: i64) -> NumericArray<u32> {
+    match to_luma(array) {
+        Some(luma) => {
+            let conn = if connectivity == 4 {
+                imageproc::region_labelling::Connectivity::Four
+            } else {
+                imageproc::region_labelling::Connectivity::Eight
+            };
+            let res = imageproc::region_labelling::connected_components(&luma, conn, image::Luma([0u8]));
+            let h = res.height() as usize;
+            let w = res.width() as usize;
+            NumericArray::<u32>::from_array(&[h, w, 1], &res.into_raw())
+        },
+        None => NumericArray::<u32>::from_slice(&[])
+    }
+}
+
+#[export]
+fn hog_memory(array: &NumericArray<u8>, orientations: i64, signed: bool, cell_side: i64, block_side: i64, block_stride: i64) -> NumericArray<f32> {
+    match to_luma(array) {
+        Some(luma) => {
+            let options = imageproc::hog::HogOptions::new(
+                orientations as usize,
+                signed,
+                cell_side as usize,
+                block_side as usize,
+                block_stride as usize,
+            );
+            if let Ok(desc) = imageproc::hog::hog(&luma, options) {
+                NumericArray::<f32>::from_array(&[desc.len()], &desc)
+            } else {
+                NumericArray::<f32>::from_slice(&[])
+            }
+        },
+        None => NumericArray::<f32>::from_slice(&[])
+    }
+}
+
+#[export]
+fn evaluate_haar_features_memory(array: &NumericArray<u8>, frame_width: i64, frame_height: i64) -> NumericArray<i32> {
+    match to_luma(array) {
+        Some(luma) => {
+            if luma.width() < frame_width as u32 || luma.height() < frame_height as u32 {
+                 return NumericArray::<i32>::from_slice(&[]);
+            }
+            let integral = imageproc::integral_image::integral_image(&luma);
+            let features = imageproc::haar::enumerate_haar_features(frame_width as u8, frame_height as u8);
+            let mut results = Vec::with_capacity(features.len());
+            for f in features {
+                results.push(f.evaluate(&integral));
+            }
+            NumericArray::<i32>::from_array(&[results.len()], &results)
+        },
+        None => NumericArray::<i32>::from_slice(&[])
+    }
+}
+
+#[export]
+fn local_binary_pattern_image_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
+    match to_luma(array) {
+        Some(luma) => {
+            let (width, height) = luma.dimensions();
+            let mut out = image::ImageBuffer::new(width, height);
+            for y in 1..height.saturating_sub(1) {
+                for x in 1..width.saturating_sub(1) {
+                    if let Some(p) = imageproc::local_binary_patterns::local_binary_pattern(&luma, x, y) {
+                        out.put_pixel(x, y, image::Luma([p]));
+                    }
+                }
+            }
+            NumericArray::<u8>::from_array(&[height as usize, width as usize, 1], &out.into_raw())
+        },
+        None => NumericArray::<u8>::from_slice(&[])
+    }
+}
+
+#[export]
+fn suppress_non_maximum_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
+    match to_luma(array) {
+        Some(luma) => {
+            let res = imageproc::suppress::suppress_non_maximum(&luma, radius as u32);
+            NumericArray::<u8>::from_array(&[luma.height() as usize, luma.width() as usize, 1], &res.into_raw())
+        },
+        None => NumericArray::<u8>::from_slice(&[])
+    }
+}

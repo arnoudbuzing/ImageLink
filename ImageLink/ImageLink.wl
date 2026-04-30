@@ -42,14 +42,32 @@ ImageLinkMatchHistogramMemory::usage = "ImageLinkMatchHistogramMemory[img, targe
 ImageLinkCornersFast9Memory::usage = "ImageLinkCornersFast9Memory[img, threshold] detects corners using the FAST-9 algorithm.";
 ImageLinkMatchTemplateMemory::usage = "ImageLinkMatchTemplateMemory[img, template, method] performs template matching. Method: 1=SSE, 2=SSE Normalized, 3=CrossCorrelation, 4=CrossCorrelation Normalized.";
 ImageLinkDistanceTransformMemory::usage = "ImageLinkDistanceTransformMemory[img, norm] computes the distance transform using L1 (1) or LInf (2) norm.";
+ImageLinkCornersFast12Memory::usage = "ImageLinkCornersFast12Memory[img, threshold] detects corners using the FAST-12 algorithm.";
+ImageLinkConnectedComponentsMemory::usage = "ImageLinkConnectedComponentsMemory[img, connectivity] returns an image with connected components labelled. Connectivity is 4 or 8.";
+ImageLinkHogMemory::usage = "ImageLinkHogMemory[img, orientations, signed, cellSide, blockSide, blockStride] computes the Histogram of Oriented Gradients (HOG) descriptor for an image.";
 ImageLinkFindContoursMemory::usage = "ImageLinkFindContoursMemory[img, threshold] returns a list of contours detected in the image.";
 ImageLinkConvexHullMemory::usage = "ImageLinkConvexHullMemory[points] computes the convex hull of a set of 2D points.";
 ImageLinkMinAreaRectMemory::usage = "ImageLinkMinAreaRectMemory[points] computes the minimum area bounding rectangle of a set of 2D points.";
 ImageLinkApproximatePolygonMemory::usage = "ImageLinkApproximatePolygonMemory[points, epsilon, closed] approximates a polygon.";
 ImageLinkArcLengthMemory::usage = "ImageLinkArcLengthMemory[points, closed] computes the arc length of a contour.";
 ImageLinkContourAreaMemory::usage = "ImageLinkContourAreaMemory[points] computes the area of a contour.";
+ImageLinkSobelGradientsMemory::usage = "ImageLinkSobelGradientsMemory[img] computes the 2D Sobel gradient magnitude of an image.";
+ImageLinkPrewittGradientsMemory::usage = "ImageLinkPrewittGradientsMemory[img] computes the 2D Prewitt gradient magnitude of an image.";
+ImageLinkHorizontalSobelMemory::usage = "ImageLinkHorizontalSobelMemory[img] computes the horizontal Sobel gradient of an image.";
+ImageLinkVerticalSobelMemory::usage = "ImageLinkVerticalSobelMemory[img] computes the vertical Sobel gradient of an image.";
+ImageLinkHorizontalPrewittMemory::usage = "ImageLinkHorizontalPrewittMemory[img] computes the horizontal Prewitt gradient of an image.";
+ImageLinkVerticalPrewittMemory::usage = "ImageLinkVerticalPrewittMemory[img] computes the vertical Prewitt gradient of an image.";
+ImageLinkHorizontalScharrMemory::usage = "ImageLinkHorizontalScharrMemory[img] computes the horizontal Scharr gradient of an image.";
+ImageLinkVerticalScharrMemory::usage = "ImageLinkVerticalScharrMemory[img] computes the vertical Scharr gradient of an image.";
 ImageLinkDrawTextMemory::usage = "ImageLinkDrawTextMemory[image, text, {x, y}, scale, fontPath, color] draws text directly in memory."
 ImageLinkFloodFillMemory::usage = "ImageLinkFloodFillMemory[image, {x, y}, color] performs a flood fill directly in memory."
+ImageLinkBilateralFilterMemory::usage = "ImageLinkBilateralFilterMemory[image, radius, sigmaSpatial, sigmaColor] applies a bilateral filter directly in memory."
+ImageLinkLaplacianFilterMemory::usage = "ImageLinkLaplacianFilterMemory[image] applies a Laplacian filter directly in memory."
+ImageLinkIntegralImageMemory::usage = "ImageLinkIntegralImageMemory[image] computes the integral image directly in memory."
+ImageLinkIntegralSquaredImageMemory::usage = "ImageLinkIntegralSquaredImageMemory[image] computes the integral squared image directly in memory."
+ImageLinkEvaluateHaarFeaturesMemory::usage = "ImageLinkEvaluateHaarFeaturesMemory[image, frameWidth, frameHeight] evaluates all Haar features for the given frame size on the image."
+ImageLinkLocalBinaryPatternMemory::usage = "ImageLinkLocalBinaryPatternMemory[image] computes the Local Binary Pattern (LBP) image."
+ImageLinkSuppressNonMaximumMemory::usage = "ImageLinkSuppressNonMaximumMemory[image, radius] suppresses non-maximum values in a local neighborhood."
 ImageLinkDrawAntialiasedLineMemory::usage = "ImageLinkDrawAntialiasedLineMemory[image, {x1, y1}, {x2, y2}, color] draws an anti-aliased line segment directly in memory."
 ImageLinkDrawBezierMemory::usage = "ImageLinkDrawBezierMemory[image, {p1, p2, p3, p4}, color] draws a cubic Bezier curve directly in memory."
 ImageLinkHistogramMemory::usage = "ImageLinkHistogramMemory[image] returns a list of histograms (one per channel) for the image."
@@ -70,6 +88,7 @@ $LibraryFileStats = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResourc
 $LibraryFileDrawing = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_drawing.dylib"}];
 $LibraryFileVision = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_vision.dylib"}];
 $LibraryFileGeometry = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_geometry.dylib"}];
+$LibraryFileFilter = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust_filter.dylib"}];
 ];
 
 imageLinkVersionFunc = LibraryFunctionLoad[$LibraryFile, "get_version", {}, "UTF8String"];
@@ -128,8 +147,28 @@ imageLinkGeometryArcLengthMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry,
 imageLinkGeometryContourAreaMemoryFunc = LibraryFunctionLoad[$LibraryFileGeometry, "geometry_contour_area_memory", {{LibraryDataType[NumericArray, "Integer64"]}}, Real];
 
 imageLinkCornersFast9MemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "corners_fast9_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "Integer64"]];
+imageLinkCornersFast12MemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "corners_fast12_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "Integer64"]];
 imageLinkMatchTemplateMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "match_template_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, {LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "Real64"]];
 imageLinkDistanceTransformMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "distance_transform_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkConnectedComponentsMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "connected_components_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "UnsignedInteger32"]];
+imageLinkHogMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "hog_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, "Boolean", Integer, Integer, Integer}, LibraryDataType[NumericArray, "Real32"]];
+imageLinkEvaluateHaarFeaturesMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "evaluate_haar_features_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Integer}, LibraryDataType[NumericArray, "Integer32"]];
+imageLinkLocalBinaryPatternImageMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "local_binary_pattern_image_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkSuppressNonMaximumMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "suppress_non_maximum_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+
+imageLinkSobelGradientsMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "sobel_gradients_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger16"]];
+imageLinkPrewittGradientsMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "prewitt_gradients_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger16"]];
+imageLinkHorizontalSobelMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "horizontal_sobel_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "Integer16"]];
+imageLinkVerticalSobelMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "vertical_sobel_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "Integer16"]];
+imageLinkHorizontalPrewittMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "horizontal_prewitt_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "Integer16"]];
+imageLinkVerticalPrewittMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "vertical_prewitt_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "Integer16"]];
+imageLinkHorizontalScharrMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "horizontal_scharr_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "Integer16"]];
+imageLinkVerticalScharrMemoryFunc = LibraryFunctionLoad[$LibraryFileVision, "vertical_scharr_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "Integer16"]];
+
+imageLinkFilterBilateralMemoryFunc = LibraryFunctionLoad[$LibraryFileFilter, "filter_bilateral_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}, Integer, Real, Real}, LibraryDataType[NumericArray, "UnsignedInteger8"]];
+imageLinkFilterLaplacianMemoryFunc = LibraryFunctionLoad[$LibraryFileFilter, "filter_laplacian_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "Integer16"]];
+imageLinkFilterIntegralImageMemoryFunc = LibraryFunctionLoad[$LibraryFileFilter, "filter_integral_image_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger32"]];
+imageLinkFilterIntegralSquaredImageMemoryFunc = LibraryFunctionLoad[$LibraryFileFilter, "filter_integral_squared_image_memory", {{LibraryDataType[NumericArray, "UnsignedInteger8"]}}, LibraryDataType[NumericArray, "UnsignedInteger64"]];
 
 ImageLinkVersion[] := imageLinkVersionFunc[]
 
@@ -560,6 +599,101 @@ ImageLinkContourAreaMemory[points_List] := Module[
   {na},
   na = NumericArray[Flatten[points], "Integer64"];
   imageLinkGeometryContourAreaMemoryFunc[na]
+]
+
+ImageLinkSobelGradientsMemory[img_Image] := Module[{data, res},
+  data = ImageData[img, "Byte"];
+  res = imageLinkSobelGradientsMemoryFunc[NumericArray[data, "UnsignedInteger8"]];
+  Image[Normal[res], "Bit16"]
+];
+
+ImageLinkPrewittGradientsMemory[img_Image] := Module[{data, res},
+  data = ImageData[img, "Byte"];
+  res = imageLinkPrewittGradientsMemoryFunc[NumericArray[data, "UnsignedInteger8"]];
+  Image[Normal[res], "Bit16"]
+];
+
+ImageLinkHorizontalSobelMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkHorizontalSobelMemoryFunc[NumericArray[data, "UnsignedInteger8"]]]
+];
+
+ImageLinkVerticalSobelMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkVerticalSobelMemoryFunc[NumericArray[data, "UnsignedInteger8"]]]
+];
+
+ImageLinkHorizontalPrewittMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkHorizontalPrewittMemoryFunc[NumericArray[data, "UnsignedInteger8"]]]
+];
+
+ImageLinkVerticalPrewittMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkVerticalPrewittMemoryFunc[NumericArray[data, "UnsignedInteger8"]]]
+];
+
+ImageLinkHorizontalScharrMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkHorizontalScharrMemoryFunc[NumericArray[data, "UnsignedInteger8"]]]
+];
+
+ImageLinkVerticalScharrMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkVerticalScharrMemoryFunc[NumericArray[data, "UnsignedInteger8"]]]
+];
+
+ImageLinkCornersFast12Memory[img_Image, threshold_Integer: 10] := Module[{data, res},
+  data = ImageData[img, "Byte"];
+  res = Normal[imageLinkCornersFast12MemoryFunc[NumericArray[data, "UnsignedInteger8"], threshold]];
+  Partition[res, 2]
+];
+
+ImageLinkConnectedComponentsMemory[img_Image, connectivity_Integer: 8] := Module[{data, res, dims},
+  data = ImageData[img, "Byte"];
+  res = imageLinkConnectedComponentsMemoryFunc[NumericArray[data, "UnsignedInteger8"], connectivity];
+  dims = Dimensions[img];
+  Image[NumericArray[ArrayReshape[Normal[res], Reverse[dims[[1;;2]]]], "UnsignedInteger32"], "Bit32"]
+];
+
+ImageLinkHogMemory[img_Image, orientations_Integer: 8, signed:(True|False):True, cellSide_Integer: 8, blockSide_Integer: 2, blockStride_Integer: 1] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkHogMemoryFunc[NumericArray[data, "UnsignedInteger8"], orientations, signed, cellSide, blockSide, blockStride]]
+];
+
+ImageLinkBilateralFilterMemory[img_Image, radius_Integer, sigmaSpatial_?NumericQ, sigmaColor_?NumericQ] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Image[Normal[imageLinkFilterBilateralMemoryFunc[NumericArray[data, "UnsignedInteger8"], radius, N[sigmaSpatial], N[sigmaColor]]], "Byte"]
+]
+
+ImageLinkLaplacianFilterMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  imageLinkFilterLaplacianMemoryFunc[NumericArray[data, "UnsignedInteger8"]]
+]
+
+ImageLinkIntegralImageMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkFilterIntegralImageMemoryFunc[NumericArray[data, "UnsignedInteger8"]]]
+]
+
+ImageLinkIntegralSquaredImageMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkFilterIntegralSquaredImageMemoryFunc[NumericArray[data, "UnsignedInteger8"]]]
+]
+
+ImageLinkEvaluateHaarFeaturesMemory[img_Image, frameWidth_Integer, frameHeight_Integer] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Normal[imageLinkEvaluateHaarFeaturesMemoryFunc[NumericArray[data, "UnsignedInteger8"], frameWidth, frameHeight]]
+]
+
+ImageLinkLocalBinaryPatternMemory[img_Image] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Image[Normal[imageLinkLocalBinaryPatternImageMemoryFunc[NumericArray[data, "UnsignedInteger8"]]], "Byte"]
+]
+
+ImageLinkSuppressNonMaximumMemory[img_Image, radius_Integer] := Module[{data},
+  data = ImageData[img, "Byte"];
+  Image[Normal[imageLinkSuppressNonMaximumMemoryFunc[NumericArray[data, "UnsignedInteger8"], radius]], "Byte"]
 ]
 
 End[]

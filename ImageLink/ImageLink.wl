@@ -81,6 +81,8 @@ $LibraryFile = FindLibrary["librust"];
 $LibraryFileDrawing = FindLibrary["librust_drawing"];
 $LibraryFileStats = FindLibrary["librust_stats"];
 $LibraryFileGeometry = FindLibrary["librust_geometry"];
+$LibraryFileVision = FindLibrary["librust_vision"];
+$LibraryFileFilter = FindLibrary["librust_filter"];
 
 If[$LibraryFile === $Failed,
 $LibraryFile = FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID, "librust.dylib"}];

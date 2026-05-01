@@ -1,0 +1,1 @@
+rd_("CjCore image processing functions for the ImageLink project.CeStatistical analysis and image comparison for the \xe2\x80\xa6CeImage filtering operations for the ImageLink project.CeComputer vision algorithms for the ImageLink project.BmDrawing primitives for the ImageLink project.ClGeometric transformations and analysis for the ImageLink \xe2\x80\xa6")

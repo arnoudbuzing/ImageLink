@@ -1,6 +1,14 @@
+//! Computer vision algorithms for the ImageLink project.
+//!
+//! This crate provides high-performance vision primitives such as corner detection,
+//! template matching, and feature extraction, exported for use in the Wolfram Language.
+
 use wolfram_library_link::{export, NumericArray};
 use image::{ImageBuffer, Rgb, Rgba};
 
+/// Internal utility to convert a NumericArray to a Luma (grayscale) ImageBuffer.
+///
+/// Supports 3-channel (RGB), 4-channel (RGBA), and 1-channel (Luma) inputs.
 fn to_luma(array: &NumericArray<u8>) -> Option<ImageBuffer<image::Luma<u8>, Vec<u8>>> {
     let dims = array.dimensions();
     if dims.len() < 2 { return None; }
@@ -19,11 +27,20 @@ fn to_luma(array: &NumericArray<u8>) -> Option<ImageBuffer<image::Luma<u8>, Vec<
     })
 }
 
+/// Returns the version string of the rust_vision crate.
 #[export]
 fn vision_get_version() -> String {
     "0.1.0".to_string()
 }
 
+/// Detects corners using the FAST-9 algorithm.
+///
+/// # Arguments
+/// * `array` - Input image as a NumericArray.
+/// * `threshold` - Intensity threshold for pixel differences.
+///
+/// # Returns
+/// A NumericArray of shape [N, 2] containing {x, y} coordinates of detected corners.
 #[export]
 fn corners_fast9_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArray<i64> {
     match to_luma(array) {
@@ -40,6 +57,16 @@ fn corners_fast9_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArra
     }
 }
 
+/// Performs template matching between an image and a template.
+///
+/// # Arguments
+/// * `array` - The source image to search in.
+/// * `template_array` - The template image to search for.
+/// * `method` - Matching method: 1 (SumOfSquaredErrors), 2 (SumOfSquaredErrorsNormalized),
+///              3 (CrossCorrelation), 4 (CrossCorrelationNormalized).
+///
+/// # Returns
+/// A 2D NumericArray (F64) representing the matching scores across the image.
 #[export]
 fn match_template_memory(array: &NumericArray<u8>, template_array: &NumericArray<u8>, method: i64) -> NumericArray<f64> {
     let luma1 = to_luma(array);
@@ -68,6 +95,14 @@ fn match_template_memory(array: &NumericArray<u8>, template_array: &NumericArray
     }
 }
 
+/// Computes the distance transform of a binary image.
+///
+/// # Arguments
+/// * `array` - Input binary image.
+/// * `norm` - Distance norm: 1 (L1/Manhattan), otherwise (L-Infinity/Chebyshev).
+///
+/// # Returns
+/// A 2D NumericArray (U8) where each pixel value is the distance to the nearest background pixel.
 #[export]
 fn distance_transform_memory(array: &NumericArray<u8>, norm: i64) -> NumericArray<u8> {
     match to_luma(array) {
@@ -86,6 +121,7 @@ fn distance_transform_memory(array: &NumericArray<u8>, norm: i64) -> NumericArra
     }
 }
 
+/// Computes Sobel gradients (magnitude) of an image.
 #[export]
 fn sobel_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
     match to_luma(array) {
@@ -99,6 +135,7 @@ fn sobel_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
     }
 }
 
+/// Computes Prewitt gradients (magnitude) of an image.
 #[export]
 fn prewitt_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
     match to_luma(array) {
@@ -164,6 +201,7 @@ fn vertical_prewitt_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     }
 }
 
+/// Computes the horizontal Scharr operator for an image.
 #[export]
 fn horizontal_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     match to_luma(array) {
@@ -177,6 +215,7 @@ fn horizontal_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     }
 }
 
+/// Computes the vertical Scharr operator for an image.
 #[export]
 fn vertical_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     match to_luma(array) {
@@ -190,6 +229,7 @@ fn vertical_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     }
 }
 
+/// Detects corners using the FAST-12 algorithm.
 #[export]
 fn corners_fast12_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArray<i64> {
     match to_luma(array) {
@@ -206,6 +246,7 @@ fn corners_fast12_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArr
     }
 }
 
+/// Performs connected components labeling on a binary image.
 #[export]
 fn connected_components_memory(array: &NumericArray<u8>, connectivity: i64) -> NumericArray<u32> {
     match to_luma(array) {
@@ -224,6 +265,18 @@ fn connected_components_memory(array: &NumericArray<u8>, connectivity: i64) -> N
     }
 }
 
+/// Computes the Histogram of Oriented Gradients (HOG) descriptor.
+///
+/// # Arguments
+/// * `array` - Input image.
+/// * `orientations` - Number of orientation bins.
+/// * `signed` - Whether to use signed or unsigned gradients.
+/// * `cell_side` - Side length of a square cell in pixels.
+/// * `block_side` - Side length of a square block in cells.
+/// * `block_stride` - Stride between blocks in cells.
+///
+/// # Returns
+/// A 1D NumericArray (F32) containing the full HOG descriptor vector.
 #[export]
 fn hog_memory(array: &NumericArray<u8>, orientations: i64, signed: bool, cell_side: i64, block_side: i64, block_stride: i64) -> NumericArray<f32> {
     match to_luma(array) {
@@ -245,6 +298,7 @@ fn hog_memory(array: &NumericArray<u8>, orientations: i64, signed: bool, cell_si
     }
 }
 
+/// Evaluates all Haar features for a given frame size on an image.
 #[export]
 fn evaluate_haar_features_memory(array: &NumericArray<u8>, frame_width: i64, frame_height: i64) -> NumericArray<i32> {
     match to_luma(array) {
@@ -264,6 +318,7 @@ fn evaluate_haar_features_memory(array: &NumericArray<u8>, frame_width: i64, fra
     }
 }
 
+/// Computes the Local Binary Pattern (LBP) image.
 #[export]
 fn local_binary_pattern_image_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
     match to_luma(array) {
@@ -283,6 +338,7 @@ fn local_binary_pattern_image_memory(array: &NumericArray<u8>) -> NumericArray<u
     }
 }
 
+/// Performs non-maximum suppression on an image.
 #[export]
 fn suppress_non_maximum_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
     match to_luma(array) {

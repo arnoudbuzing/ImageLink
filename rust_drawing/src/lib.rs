@@ -1,12 +1,25 @@
+//! Drawing primitives for the ImageLink project.
+//!
+//! This crate provides functions for drawing shapes (lines, rectangles, circles, 
+//! ellipses, polygons) and text directly onto memory-backed images.
+
 use wolfram_library_link::{export, NumericArray};
 use image::{ImageBuffer, Rgb, Rgba};
 use ab_glyph::{FontRef, PxScale};
 
+/// Returns the version string of the rust_drawing crate.
 #[export]
 fn drawing_get_version() -> String {
     "0.1.0".to_string()
 }
 
+/// Draws a line segment between two points on a memory-based image.
+///
+/// # Arguments
+/// * `array` - Input image.
+/// * `x1`, `y1` - Start coordinates.
+/// * `x2`, `y2` - End coordinates.
+/// * `color_array` - RGB, RGBA, or Luma color values.
 #[export]
 fn draw_line_memory(array: &NumericArray<u8>, x1: f64, y1: f64, x2: f64, y2: f64, color_array: &NumericArray<u8>) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -52,6 +65,10 @@ fn draw_line_memory(array: &NumericArray<u8>, x1: f64, y1: f64, x2: f64, y2: f64
     }
 }
 
+/// Draws a rectangle on a memory-based image.
+///
+/// # Arguments
+/// * `filled` - Whether to fill the rectangle or draw just the border.
 #[export]
 fn draw_rect_memory(array: &NumericArray<u8>, x: i64, y: i64, rect_w: i64, rect_h: i64, color_array: &NumericArray<u8>, filled: bool) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -110,6 +127,7 @@ fn draw_rect_memory(array: &NumericArray<u8>, x: i64, y: i64, rect_w: i64, rect_
     }
 }
 
+/// Draws a circle on a memory-based image.
 #[export]
 fn draw_circle_memory(array: &NumericArray<u8>, cx: i64, cy: i64, radius: i64, color_array: &NumericArray<u8>, filled: bool) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -167,6 +185,7 @@ fn draw_circle_memory(array: &NumericArray<u8>, cx: i64, cy: i64, radius: i64, c
     }
 }
 
+/// Draws an ellipse on a memory-based image.
 #[export]
 fn draw_ellipse_memory(array: &NumericArray<u8>, cx: i64, cy: i64, rx: i64, ry: i64, color_array: &NumericArray<u8>, filled: bool) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -224,6 +243,7 @@ fn draw_ellipse_memory(array: &NumericArray<u8>, cx: i64, cy: i64, rx: i64, ry: 
     }
 }
 
+/// Draws a polygon on a memory-based image.
 #[export]
 fn draw_polygon_memory(array: &NumericArray<u8>, points_x: &NumericArray<i64>, points_y: &NumericArray<i64>, color_array: &NumericArray<u8>, filled: bool) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -291,6 +311,7 @@ fn draw_polygon_memory(array: &NumericArray<u8>, points_x: &NumericArray<i64>, p
     }
 }
 
+/// Fills a connected region with a color.
 #[export]
 fn flood_fill_memory(array: &NumericArray<u8>, x: i64, y: i64, color_array: &NumericArray<u8>) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -317,6 +338,7 @@ fn flood_fill_memory(array: &NumericArray<u8>, x: i64, y: i64, color_array: &Num
     }
 }
 
+/// Draws an anti-aliased line segment.
 #[export]
 fn draw_antialiased_line_memory(array: &NumericArray<u8>, x1: i64, y1: i64, x2: i64, y2: i64, color_array: &NumericArray<u8>) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -349,6 +371,7 @@ fn draw_antialiased_line_memory(array: &NumericArray<u8>, x1: i64, y1: i64, x2: 
     }
 }
 
+/// Draws a cubic Bezier curve.
 #[export]
 fn draw_bezier_memory(array: &NumericArray<u8>, x1: i64, y1: i64, x2: i64, y2: i64, x3: i64, y3: i64, x4: i64, y4: i64, color_array: &NumericArray<u8>) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -375,6 +398,7 @@ fn draw_bezier_memory(array: &NumericArray<u8>, x1: i64, y1: i64, x2: i64, y2: i
     }
 }
 
+/// Renders text onto a memory-based image using a TrueType/OpenType font.
 #[export]
 fn draw_text_memory(array: &NumericArray<u8>, x: i64, y: i64, scale: f64, font_path: String, text: String, color_array: &NumericArray<u8>) -> NumericArray<u8> {
     let dims = array.dimensions();

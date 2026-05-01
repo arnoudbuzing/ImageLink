@@ -1,0 +1,1 @@
+rd_("CjCore image processing functions for the ImageLink project.CeComputer vision algorithms for the ImageLink project.")

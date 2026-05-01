@@ -1,7 +1,13 @@
+//! Image filtering operations for the ImageLink project.
+//!
+//! This crate provides edge-preserving filters (Bilateral), edge detection (Laplacian),
+//! and efficient area summation tools (Integral Images).
+
 use wolfram_library_link::{export, NumericArray};
 use image::{ImageBuffer, Rgb, Rgba};
 use imageproc::filter::bilateral::GaussianEuclideanColorDistance;
 
+/// Internal utility to convert a NumericArray to a grayscale ImageBuffer.
 fn to_luma(array: &NumericArray<u8>) -> Option<ImageBuffer<image::Luma<u8>, Vec<u8>>> {
     let dims = array.dimensions();
     if dims.len() < 2 { return None; }
@@ -20,6 +26,14 @@ fn to_luma(array: &NumericArray<u8>) -> Option<ImageBuffer<image::Luma<u8>, Vec<
     })
 }
 
+/// Applies a bilateral filter to an image.
+///
+/// Bilateral filtering is an edge-preserving smoothing filter.
+///
+/// # Arguments
+/// * `radius` - The radius of the filter kernel.
+/// * `sigma_spatial` - Standard deviation for the spatial Gaussian.
+/// * `sigma_color` - Standard deviation for the color Gaussian.
 #[export]
 fn filter_bilateral_memory(array: &NumericArray<u8>, radius: i64, sigma_spatial: f64, sigma_color: f64) -> NumericArray<u8> {
     match to_luma(array) {
@@ -35,6 +49,7 @@ fn filter_bilateral_memory(array: &NumericArray<u8>, radius: i64, sigma_spatial:
     }
 }
 
+/// Applies a Laplacian filter to an image for edge detection.
 #[export]
 fn filter_laplacian_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     match to_luma(array) {
@@ -49,6 +64,7 @@ fn filter_laplacian_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     }
 }
 
+/// Computes the integral image (summed-area table) of an image.
 #[export]
 fn filter_integral_image_memory(array: &NumericArray<u8>) -> NumericArray<u32> {
     match to_luma(array) {
@@ -62,6 +78,7 @@ fn filter_integral_image_memory(array: &NumericArray<u8>) -> NumericArray<u32> {
     }
 }
 
+/// Computes the integral of the squared pixel values of an image.
 #[export]
 fn filter_integral_squared_image_memory(array: &NumericArray<u8>) -> NumericArray<u64> {
     match to_luma(array) {

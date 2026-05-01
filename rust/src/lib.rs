@@ -1,11 +1,21 @@
+//! Core image processing functions for the ImageLink project.
+//!
+//! This crate provides the primary bridge between the Wolfram Language and the 
+//! underlying Rust image processing ecosystem. It includes both file-based 
+//! and high-performance memory-based operations.
+
 use wolfram_library_link::export;
 use image::imageops::FilterType;
 
+/// Returns the version string of the core ImageLink library.
 #[export]
 fn get_version() -> String {
     "0.1.0".to_string()
 }
 
+/// Resizes an image file and saves the result.
+/// 
+/// Supports filters: Nearest, Triangle, CatmullRom, Gaussian, Lanczos3.
 #[export]
 fn resize_image(input: String, output: String, width: i64, height: i64, filter_name: String) -> String {
     let img = match image::open(&input) {
@@ -30,6 +40,7 @@ fn resize_image(input: String, output: String, width: i64, height: i64, filter_n
         Err(e) => format!("Error saving output: {}", e),
     }
 }
+/// Flips an image file horizontally or vertically.
 #[export]
 fn flip_image(input: String, output: String, direction: String) -> String {
     let img = match image::open(&input) {
@@ -49,6 +60,7 @@ fn flip_image(input: String, output: String, direction: String) -> String {
     }
 }
 
+/// Rotates an image file by 90, 180, or 270 degrees.
 #[export]
 fn rotate_image(input: String, output: String, angle: i64) -> String {
     let img = match image::open(&input) {
@@ -69,6 +81,7 @@ fn rotate_image(input: String, output: String, angle: i64) -> String {
     }
 }
 
+/// Crops an image file to the specified rectangle.
 #[export]
 fn crop_image(input: String, output: String, x: i64, y: i64, w: i64, h: i64) -> String {
     let mut img = match image::open(&input) {
@@ -141,6 +154,7 @@ fn unsharpen_image(input: String, output: String, sigma: f64, threshold: i64) ->
         Err(e) => format!("Error saving output: {}", e),
     }
 }
+/// Returns the width and height of an image file as a comma-separated string.
 #[export]
 fn image_dimensions(input: String) -> String {
     match image::open(&input) {
@@ -149,6 +163,7 @@ fn image_dimensions(input: String) -> String {
     }
 }
 
+/// Returns the color type of an image file.
 #[export]
 fn image_color_type(input: String) -> String {
     match image::open(&input) {
@@ -160,6 +175,7 @@ fn image_color_type(input: String) -> String {
 use wolfram_library_link::NumericArray;
 use image::{ImageBuffer, Rgb, Rgba};
 
+/// Blurs an image stored in memory using a Gaussian filter.
 #[export]
 fn blur_memory(array: &NumericArray<u8>, sigma: f64) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -185,6 +201,7 @@ fn blur_memory(array: &NumericArray<u8>, sigma: f64) -> NumericArray<u8> {
     }
 }
 
+/// Inverts the colors of an image stored in memory.
 #[export]
 fn invert_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -302,6 +319,7 @@ fn rotate_memory(array: &NumericArray<u8>, angle: i64) -> NumericArray<u8> {
     }
 }
 
+/// Converts a memory-based image to grayscale.
 #[export]
 fn grayscale_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -351,6 +369,7 @@ fn crop_memory(array: &NumericArray<u8>, x: i64, y: i64, target_w: i64, target_h
     }
 }
 
+/// Resizes a memory-based image.
 #[export]
 fn resize_memory(array: &NumericArray<u8>, target_w: i64, target_h: i64, filter_name: String) -> NumericArray<u8> {
     let filter = match filter_name.as_str() {
@@ -384,6 +403,7 @@ fn resize_memory(array: &NumericArray<u8>, target_w: i64, target_h: i64, filter_
         NumericArray::<u8>::from_slice(slice)
     }
 }
+/// Detects edges in a memory-based image using the Canny algorithm.
 #[export]
 fn canny_memory(array: &NumericArray<u8>, low: f64, high: f64) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -409,6 +429,7 @@ fn canny_memory(array: &NumericArray<u8>, low: f64, high: f64) -> NumericArray<u
     let edges = imageproc::edges::canny(&gray_img, low as f32, high as f32);
     NumericArray::<u8>::from_slice(edges.as_raw())
 }
+/// Performs morphological dilation on a memory-based image.
 #[export]
 fn dilate_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -453,6 +474,7 @@ fn dilate_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
     NumericArray::<u8>::from_slice(&out_slice)
 }
 
+/// Performs morphological erosion on a memory-based image.
 #[export]
 fn erode_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
@@ -625,6 +647,7 @@ fn adaptive_threshold_memory(array: &NumericArray<u8>, block_radius: i64, delta:
     NumericArray::<u8>::from_slice(thresh.as_raw())
 }
 
+/// Performs content-aware image resizing (seam carving) by shrinking width.
 #[export]
 fn shrink_width_memory(array: &NumericArray<u8>, target_width: i64) -> NumericArray<u8> {
     let dims = array.dimensions();

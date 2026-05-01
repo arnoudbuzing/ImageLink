@@ -1,6 +1,12 @@
+//! Statistical analysis and image comparison for the ImageLink project.
+//!
+//! This crate provides tools for histogram analysis, perceptual hashing,
+//! and image similarity metrics (PSNR).
+
 use wolfram_library_link::{export, NumericArray};
 use image::{ImageBuffer, Rgb, Rgba};
 
+/// Internal utility to convert a NumericArray to a grayscale ImageBuffer.
 fn to_luma(array: &NumericArray<u8>) -> Option<ImageBuffer<image::Luma<u8>, Vec<u8>>> {
     let dims = array.dimensions();
     if dims.len() < 2 { return None; }
@@ -19,6 +25,7 @@ fn to_luma(array: &NumericArray<u8>) -> Option<ImageBuffer<image::Luma<u8>, Vec<
     })
 }
 
+/// Returns the version string of the rust_stats crate.
 #[export]
 fn stats_get_version() -> String {
     "0.1.0".to_string()
@@ -99,6 +106,7 @@ fn otsu_level_memory(array: &NumericArray<u8>) -> i64 {
     }
 }
 
+/// Computes Kapur's entropy-based threshold for image binarization.
 #[export]
 fn kapur_level_memory(array: &NumericArray<u8>) -> i64 {
     match to_luma(array) {
@@ -107,6 +115,7 @@ fn kapur_level_memory(array: &NumericArray<u8>) -> i64 {
     }
 }
 
+/// Adjusts the luminance of an image to match the histogram of another image.
 #[export]
 fn match_histogram_memory(array1: &NumericArray<u8>, array2: &NumericArray<u8>) -> NumericArray<u8> {
     let d1 = array1.dimensions();

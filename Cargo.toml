@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = [
+    "src/rust",
+    "src/rust_drawing",
+    "src/rust_filter",
+    "src/rust_geometry",
+    "src/rust_stats",
+    "src/rust_vision",
+]

@@ -1,8 +1,20 @@
 # Rust build output
-*/target/
+target/
+**/target/
+Cargo.lock
 
 # OS X
 .DS_Store
 
 # Temporary files
 *.wl.tmp
+*.tmp
+.DS_Store
+*.dylib
+*.so
+*.dll
+*.exe
+
+# Paclet build output
+*.paclet
+ImageLink/LibraryResources/*/librust*

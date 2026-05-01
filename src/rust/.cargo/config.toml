@@ -1,0 +1,3 @@
+[env]
+WOLFRAM_APP_DIRECTORY = { value = "../wolfram", relative = true }
+WSTP_COMPILER_ADDITIONS = { value = "../wolfram/WSTP/DeveloperKit/MacOSX-ARM64/CompilerAdditions", relative = true }

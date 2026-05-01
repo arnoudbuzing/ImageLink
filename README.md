@@ -266,15 +266,23 @@ The project includes a comprehensive suite of unit tests. To run the full test r
 This will execute all `.wlt` files in the `tests/` directory and display a summary of results.
 
 ### Building from Source
-To build the Rust LibraryLink extension:
+To build the Rust LibraryLink extensions:
 
 1. Ensure you have [Rust](https://rustup.rs/) installed.
-2. Navigate to the `rust/` directory.
-3. Run the build command:
+2. **Option A: Build all at once (Workspace)**
    ```bash
    cargo build --release
    ```
-4. Copy the compiled library to the paclet resources:
+   This will build all crates and place the binaries in the top-level `target/release/` directory.
+   
+3. **Option B: Build a specific crate**
+   Navigate to the specific crate directory (e.g., `src/rust/`) and run:
    ```bash
-   cp target/release/librust.dylib ../ImageLink/LibraryResources/MacOSX-ARM64/
+   cargo build --release
+   ```
+
+4. Copy the compiled libraries to the paclet resources:
+   ```bash
+   # From root (if using Workspace build):
+   cp target/release/librust*.dylib ImageLink/LibraryResources/MacOSX-ARM64/
    ```

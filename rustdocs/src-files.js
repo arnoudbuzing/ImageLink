@@ -1,0 +1,2 @@
+createSrcSidebar('[["rust",["",[],["lib.rs"]]],["rust_drawing",["",[],["lib.rs"]]],["rust_filter",["",[],["lib.rs"]]],["rust_geometry",["",[],["lib.rs"]]],["rust_stats",["",[],["lib.rs"]]],["rust_vision",["",[],["lib.rs"]]],["test_imageproc",["",[],["test_imageproc.rs"]]]]');
+//{"start":19,"fragment_lengths":[27,36,35,37,34,35,49]}

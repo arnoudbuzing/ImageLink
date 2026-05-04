@@ -35,7 +35,7 @@ fn to_luma(array: &NumericArray<u8>) -> Option<ImageBuffer<image::Luma<u8>, Vec<
 /// * `sigma_spatial` - Standard deviation for the spatial Gaussian.
 /// * `sigma_color` - Standard deviation for the color Gaussian.
 #[export]
-fn filter_bilateral_memory(array: &NumericArray<u8>, radius: i64, sigma_spatial: f64, sigma_color: f64) -> NumericArray<u8> {
+pub fn filter_bilateral_memory(array: &NumericArray<u8>, radius: i64, sigma_spatial: f64, sigma_color: f64) -> NumericArray<u8> {
     match to_luma(array) {
         Some(luma) => {
             let color_dist = GaussianEuclideanColorDistance::new(sigma_color as f32);
@@ -51,7 +51,7 @@ fn filter_bilateral_memory(array: &NumericArray<u8>, radius: i64, sigma_spatial:
 
 /// Applies a Laplacian filter to an image for edge detection.
 #[export]
-fn filter_laplacian_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+pub fn filter_laplacian_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     match to_luma(array) {
         Some(luma) => {
             let res = imageproc::filter::laplacian_filter(&luma);
@@ -66,7 +66,7 @@ fn filter_laplacian_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
 
 /// Computes the integral image (summed-area table) of an image.
 #[export]
-fn filter_integral_image_memory(array: &NumericArray<u8>) -> NumericArray<u32> {
+pub fn filter_integral_image_memory(array: &NumericArray<u8>) -> NumericArray<u32> {
     match to_luma(array) {
         Some(luma) => {
             let res: image::ImageBuffer<image::Luma<u32>, Vec<u32>> = imageproc::integral_image::integral_image(&luma);
@@ -80,7 +80,7 @@ fn filter_integral_image_memory(array: &NumericArray<u8>) -> NumericArray<u32> {
 
 /// Computes the integral of the squared pixel values of an image.
 #[export]
-fn filter_integral_squared_image_memory(array: &NumericArray<u8>) -> NumericArray<u64> {
+pub fn filter_integral_squared_image_memory(array: &NumericArray<u8>) -> NumericArray<u64> {
     match to_luma(array) {
         Some(luma) => {
             let res: image::ImageBuffer<image::Luma<u64>, Vec<u64>> = imageproc::integral_image::integral_squared_image(&luma);

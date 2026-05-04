@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {};
+window.SIDEBAR_ITEMS = {"fn":["connected_components_memory","corners_fast12_memory","corners_fast9_memory","distance_transform_memory","evaluate_haar_features_memory","hog_memory","horizontal_prewitt_memory","horizontal_scharr_memory","horizontal_sobel_memory","local_binary_pattern_image_memory","match_template_memory","prewitt_gradients_memory","sobel_gradients_memory","suppress_non_maximum_memory","vertical_prewitt_memory","vertical_scharr_memory","vertical_sobel_memory","vision_get_version"]};

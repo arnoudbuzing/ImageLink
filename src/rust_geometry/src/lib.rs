@@ -9,7 +9,7 @@ use imageproc::morphology;
 
 /// Returns the version string of the rust_geometry crate.
 #[export]
-fn get_geometry_version() -> String {
+pub fn get_geometry_version() -> String {
     "0.1.0".to_string()
 }
 
@@ -22,7 +22,7 @@ fn get_geometry_version() -> String {
 /// # Returns
 /// A NumericArray of shape [N, 2] containing {radius, angle_in_degrees} for each detected line.
 #[export]
-fn hough_lines_memory(array: &NumericArray<u8>, vote_threshold: i64, suppression_radius: i64) -> NumericArray<f64> {
+pub fn hough_lines_memory(array: &NumericArray<u8>, vote_threshold: i64, suppression_radius: i64) -> NumericArray<f64> {
     let dims = array.dimensions();
     if dims.len() < 2 {
         return NumericArray::<f64>::from_slice(&[]);
@@ -64,7 +64,7 @@ fn hough_lines_memory(array: &NumericArray<u8>, vote_threshold: i64, suppression
 
 /// Performs morphological opening on an image.
 #[export]
-fn morphology_open_memory(array: &NumericArray<u8>, norm: i64, k: i64) -> NumericArray<u8> {
+pub fn morphology_open_memory(array: &NumericArray<u8>, norm: i64, k: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 2 {
         return NumericArray::<u8>::from_slice(&[]);
@@ -97,7 +97,7 @@ fn morphology_open_memory(array: &NumericArray<u8>, norm: i64, k: i64) -> Numeri
 
 /// Performs morphological closing on an image.
 #[export]
-fn morphology_close_memory(array: &NumericArray<u8>, norm: i64, k: i64) -> NumericArray<u8> {
+pub fn morphology_close_memory(array: &NumericArray<u8>, norm: i64, k: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 2 {
         return NumericArray::<u8>::from_slice(&[]);
@@ -128,7 +128,7 @@ fn morphology_close_memory(array: &NumericArray<u8>, norm: i64, k: i64) -> Numer
 
 /// Rotates an image about its center by theta radians.
 #[export]
-fn geometry_rotate_about_center_memory(array: &NumericArray<u8>, theta: f64, interpolation: i64) -> NumericArray<u8> {
+pub fn geometry_rotate_about_center_memory(array: &NumericArray<u8>, theta: f64, interpolation: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 2 {
         return NumericArray::<u8>::from_slice(&[]);
@@ -161,7 +161,7 @@ fn geometry_rotate_about_center_memory(array: &NumericArray<u8>, theta: f64, int
 
 /// Applies an affine transformation defined by a 3x3 matrix.
 #[export]
-fn geometry_affine_memory(array: &NumericArray<u8>, matrix: &NumericArray<f64>, interpolation: i64) -> NumericArray<u8> {
+pub fn geometry_affine_memory(array: &NumericArray<u8>, matrix: &NumericArray<f64>, interpolation: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 2 {
         return NumericArray::<u8>::from_slice(&[]);
@@ -230,7 +230,7 @@ fn encode_points(points: &[imageproc::point::Point<i32>]) -> NumericArray<i64> {
 
 /// Finds contours in a grayscale image using a threshold.
 #[export]
-fn geometry_find_contours_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArray<i64> {
+pub fn geometry_find_contours_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArray<i64> {
     let dims = array.dimensions();
     if dims.len() < 2 {
         return NumericArray::<i64>::from_slice(&[]);
@@ -278,7 +278,7 @@ fn geometry_find_contours_memory(array: &NumericArray<u8>, threshold: i64) -> Nu
 
 /// Computes the convex hull of a set of points.
 #[export]
-fn geometry_convex_hull_memory(points_array: &NumericArray<i64>) -> NumericArray<i64> {
+pub fn geometry_convex_hull_memory(points_array: &NumericArray<i64>) -> NumericArray<i64> {
     let points = parse_points(points_array);
     let hull = imageproc::geometry::convex_hull(points);
     encode_points(&hull)
@@ -286,7 +286,7 @@ fn geometry_convex_hull_memory(points_array: &NumericArray<i64>) -> NumericArray
 
 /// Computes the minimum area rectangle enclosing a set of points.
 #[export]
-fn geometry_min_area_rect_memory(points_array: &NumericArray<i64>) -> NumericArray<i64> {
+pub fn geometry_min_area_rect_memory(points_array: &NumericArray<i64>) -> NumericArray<i64> {
     let points = parse_points(points_array);
     let rect = imageproc::geometry::min_area_rect(&points);
     
@@ -297,7 +297,7 @@ fn geometry_min_area_rect_memory(points_array: &NumericArray<i64>) -> NumericArr
 
 /// Approximates a polygon with fewer vertices using the Douglas-Peucker algorithm.
 #[export]
-fn geometry_approximate_polygon_dp_memory(points_array: &NumericArray<i64>, epsilon: f64, closed: bool) -> NumericArray<i64> {
+pub fn geometry_approximate_polygon_dp_memory(points_array: &NumericArray<i64>, epsilon: f64, closed: bool) -> NumericArray<i64> {
     let points = parse_points(points_array);
     let approx = imageproc::geometry::approximate_polygon_dp(&points, epsilon, closed);
     encode_points(&approx)
@@ -305,14 +305,14 @@ fn geometry_approximate_polygon_dp_memory(points_array: &NumericArray<i64>, epsi
 
 /// Computes the arc length of a polygon or curve.
 #[export]
-fn geometry_arc_length_memory(points_array: &NumericArray<i64>, closed: bool) -> f64 {
+pub fn geometry_arc_length_memory(points_array: &NumericArray<i64>, closed: bool) -> f64 {
     let points = parse_points(points_array);
     imageproc::geometry::arc_length(&points, closed)
 }
 
 /// Computes the area of a contour.
 #[export]
-fn geometry_contour_area_memory(points_array: &NumericArray<i64>) -> f64 {
+pub fn geometry_contour_area_memory(points_array: &NumericArray<i64>) -> f64 {
     let points = parse_points(points_array);
     imageproc::geometry::contour_area(&points)
 }

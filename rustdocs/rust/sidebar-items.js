@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {};
+window.SIDEBAR_ITEMS = {"fn":["adaptive_threshold_memory","blur_image","blur_memory","canny_memory","crop_image","crop_memory","dilate_memory","equalize_memory","erode_memory","filter3x3_memory","flip_image","flip_memory","get_version","grayscale_image","grayscale_memory","image_color_type","image_dimensions","invert_image","invert_memory","median_memory","resize_image","resize_memory","rotate_image","rotate_memory","shrink_width_memory","unsharpen_image","unsharpen_memory"]};

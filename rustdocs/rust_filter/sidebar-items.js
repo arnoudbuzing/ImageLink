@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {};
+window.SIDEBAR_ITEMS = {"fn":["filter_bilateral_memory","filter_integral_image_memory","filter_integral_squared_image_memory","filter_laplacian_memory"]};

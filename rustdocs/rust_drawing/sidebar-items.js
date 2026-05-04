@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {};
+window.SIDEBAR_ITEMS = {"fn":["draw_antialiased_line_memory","draw_bezier_memory","draw_circle_memory","draw_ellipse_memory","draw_line_memory","draw_polygon_memory","draw_rect_memory","draw_text_memory","drawing_get_version","flood_fill_memory"]};

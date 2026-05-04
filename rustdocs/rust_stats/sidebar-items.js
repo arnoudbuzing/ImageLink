@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {};
+window.SIDEBAR_ITEMS = {"fn":["histogram_memory","kapur_level_memory","match_histogram_memory","otsu_level_memory","phash_memory","psnr_memory","stats_get_version"]};

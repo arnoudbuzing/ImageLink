@@ -27,13 +27,13 @@ fn to_luma(array: &NumericArray<u8>) -> Option<ImageBuffer<image::Luma<u8>, Vec<
 
 /// Returns the version string of the rust_stats crate.
 #[export]
-fn stats_get_version() -> String {
+pub fn stats_get_version() -> String {
     "0.1.0".to_string()
 }
 
 /// Returns a flat array of shape [channels × 256] (row-major) with per-channel histograms.
 #[export]
-fn histogram_memory(array: &NumericArray<u8>) -> NumericArray<u32> {
+pub fn histogram_memory(array: &NumericArray<u8>) -> NumericArray<u32> {
     let dims = array.dimensions();
     if dims.len() < 2 { return NumericArray::<u32>::from_slice(&[0u32; 256]); }
     let h = dims[0] as u32;
@@ -62,7 +62,7 @@ fn histogram_memory(array: &NumericArray<u8>) -> NumericArray<u32> {
 
 /// Peak Signal-to-Noise Ratio between two same-size images.
 #[export]
-fn psnr_memory(array1: &NumericArray<u8>, array2: &NumericArray<u8>) -> f64 {
+pub fn psnr_memory(array1: &NumericArray<u8>, array2: &NumericArray<u8>) -> f64 {
     let d1 = array1.dimensions();
     let d2 = array2.dimensions();
     if d1 != d2 || d1.len() < 2 { return 0.0; }
@@ -86,7 +86,7 @@ fn psnr_memory(array1: &NumericArray<u8>, array2: &NumericArray<u8>) -> f64 {
 
 /// 64-bit perceptual average-hash: resize to 8×8, compare each pixel to mean.
 #[export]
-fn phash_memory(array: &NumericArray<u8>) -> i64 {
+pub fn phash_memory(array: &NumericArray<u8>) -> i64 {
     let luma = match to_luma(array) { Some(l) => l, None => return 0 };
     let small = image::imageops::resize(&luma, 8, 8, image::imageops::FilterType::Lanczos3);
     let pixels: Vec<u32> = small.pixels().map(|p| p.0[0] as u32).collect();
@@ -99,7 +99,7 @@ fn phash_memory(array: &NumericArray<u8>) -> i64 {
 
 /// Otsu's optimal binarisation threshold (0-255) on the luminance channel.
 #[export]
-fn otsu_level_memory(array: &NumericArray<u8>) -> i64 {
+pub fn otsu_level_memory(array: &NumericArray<u8>) -> i64 {
     match to_luma(array) {
         Some(luma) => imageproc::contrast::otsu_level(&luma) as i64,
         None => 0,
@@ -108,7 +108,7 @@ fn otsu_level_memory(array: &NumericArray<u8>) -> i64 {
 
 /// Computes Kapur's entropy-based threshold for image binarization.
 #[export]
-fn kapur_level_memory(array: &NumericArray<u8>) -> i64 {
+pub fn kapur_level_memory(array: &NumericArray<u8>) -> i64 {
     match to_luma(array) {
         Some(luma) => imageproc::contrast::kapur_level(&luma) as i64,
         None => 0,
@@ -117,7 +117,7 @@ fn kapur_level_memory(array: &NumericArray<u8>) -> i64 {
 
 /// Adjusts the luminance of an image to match the histogram of another image.
 #[export]
-fn match_histogram_memory(array1: &NumericArray<u8>, array2: &NumericArray<u8>) -> NumericArray<u8> {
+pub fn match_histogram_memory(array1: &NumericArray<u8>, array2: &NumericArray<u8>) -> NumericArray<u8> {
     let d1 = array1.dimensions();
     let d2 = array2.dimensions();
     if d1.len() < 2 || d2.len() < 2 {

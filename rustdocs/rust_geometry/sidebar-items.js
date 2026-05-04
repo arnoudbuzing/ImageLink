@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {};
+window.SIDEBAR_ITEMS = {"fn":["geometry_affine_memory","geometry_approximate_polygon_dp_memory","geometry_arc_length_memory","geometry_contour_area_memory","geometry_convex_hull_memory","geometry_find_contours_memory","geometry_min_area_rect_memory","geometry_rotate_about_center_memory","get_geometry_version","hough_lines_memory","morphology_close_memory","morphology_open_memory"]};

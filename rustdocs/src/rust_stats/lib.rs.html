@@ -27,13 +27,13 @@
 <a href=#27 id=27 data-nosnippet>27</a>
 <a href=#28 id=28 data-nosnippet>28</a><span class="doccomment">/// Returns the version string of the rust_stats crate.
 <a href=#29 id=29 data-nosnippet>29</a></span><span class="attr">#[export]
-<a href=#30 id=30 data-nosnippet>30</a></span><span class="kw">fn </span>stats_get_version() -&gt; String {
+<a href=#30 id=30 data-nosnippet>30</a></span><span class="kw">pub fn </span>stats_get_version() -&gt; String {
 <a href=#31 id=31 data-nosnippet>31</a>    <span class="string">"0.1.0"</span>.to_string()
 <a href=#32 id=32 data-nosnippet>32</a>}
 <a href=#33 id=33 data-nosnippet>33</a>
 <a href=#34 id=34 data-nosnippet>34</a><span class="doccomment">/// Returns a flat array of shape [channels × 256] (row-major) with per-channel histograms.
 <a href=#35 id=35 data-nosnippet>35</a></span><span class="attr">#[export]
-<a href=#36 id=36 data-nosnippet>36</a></span><span class="kw">fn </span>histogram_memory(array: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; NumericArray&lt;u32&gt; {
+<a href=#36 id=36 data-nosnippet>36</a></span><span class="kw">pub fn </span>histogram_memory(array: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; NumericArray&lt;u32&gt; {
 <a href=#37 id=37 data-nosnippet>37</a>    <span class="kw">let </span>dims = array.dimensions();
 <a href=#38 id=38 data-nosnippet>38</a>    <span class="kw">if </span>dims.len() &lt; <span class="number">2 </span>{ <span class="kw">return </span>NumericArray::&lt;u32&gt;::from_slice(<span class="kw-2">&amp;</span>[<span class="number">0u32</span>; <span class="number">256</span>]); }
 <a href=#39 id=39 data-nosnippet>39</a>    <span class="kw">let </span>h = dims[<span class="number">0</span>] <span class="kw">as </span>u32;
@@ -62,7 +62,7 @@
 <a href=#62 id=62 data-nosnippet>62</a>
 <a href=#63 id=63 data-nosnippet>63</a><span class="doccomment">/// Peak Signal-to-Noise Ratio between two same-size images.
 <a href=#64 id=64 data-nosnippet>64</a></span><span class="attr">#[export]
-<a href=#65 id=65 data-nosnippet>65</a></span><span class="kw">fn </span>psnr_memory(array1: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;, array2: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; f64 {
+<a href=#65 id=65 data-nosnippet>65</a></span><span class="kw">pub fn </span>psnr_memory(array1: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;, array2: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; f64 {
 <a href=#66 id=66 data-nosnippet>66</a>    <span class="kw">let </span>d1 = array1.dimensions();
 <a href=#67 id=67 data-nosnippet>67</a>    <span class="kw">let </span>d2 = array2.dimensions();
 <a href=#68 id=68 data-nosnippet>68</a>    <span class="kw">if </span>d1 != d2 || d1.len() &lt; <span class="number">2 </span>{ <span class="kw">return </span><span class="number">0.0</span>; }
@@ -86,7 +86,7 @@
 <a href=#86 id=86 data-nosnippet>86</a>
 <a href=#87 id=87 data-nosnippet>87</a><span class="doccomment">/// 64-bit perceptual average-hash: resize to 8×8, compare each pixel to mean.
 <a href=#88 id=88 data-nosnippet>88</a></span><span class="attr">#[export]
-<a href=#89 id=89 data-nosnippet>89</a></span><span class="kw">fn </span>phash_memory(array: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; i64 {
+<a href=#89 id=89 data-nosnippet>89</a></span><span class="kw">pub fn </span>phash_memory(array: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; i64 {
 <a href=#90 id=90 data-nosnippet>90</a>    <span class="kw">let </span>luma = <span class="kw">match </span>to_luma(array) { <span class="prelude-val">Some</span>(l) =&gt; l, <span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="number">0 </span>};
 <a href=#91 id=91 data-nosnippet>91</a>    <span class="kw">let </span>small = image::imageops::resize(<span class="kw-2">&amp;</span>luma, <span class="number">8</span>, <span class="number">8</span>, image::imageops::FilterType::Lanczos3);
 <a href=#92 id=92 data-nosnippet>92</a>    <span class="kw">let </span>pixels: Vec&lt;u32&gt; = small.pixels().map(|p| p.<span class="number">0</span>[<span class="number">0</span>] <span class="kw">as </span>u32).collect();
@@ -99,7 +99,7 @@
 <a href=#99 id=99 data-nosnippet>99</a>
 <a href=#100 id=100 data-nosnippet>100</a><span class="doccomment">/// Otsu's optimal binarisation threshold (0-255) on the luminance channel.
 <a href=#101 id=101 data-nosnippet>101</a></span><span class="attr">#[export]
-<a href=#102 id=102 data-nosnippet>102</a></span><span class="kw">fn </span>otsu_level_memory(array: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; i64 {
+<a href=#102 id=102 data-nosnippet>102</a></span><span class="kw">pub fn </span>otsu_level_memory(array: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; i64 {
 <a href=#103 id=103 data-nosnippet>103</a>    <span class="kw">match </span>to_luma(array) {
 <a href=#104 id=104 data-nosnippet>104</a>        <span class="prelude-val">Some</span>(luma) =&gt; imageproc::contrast::otsu_level(<span class="kw-2">&amp;</span>luma) <span class="kw">as </span>i64,
 <a href=#105 id=105 data-nosnippet>105</a>        <span class="prelude-val">None </span>=&gt; <span class="number">0</span>,
@@ -108,7 +108,7 @@
 <a href=#108 id=108 data-nosnippet>108</a>
 <a href=#109 id=109 data-nosnippet>109</a><span class="doccomment">/// Computes Kapur's entropy-based threshold for image binarization.
 <a href=#110 id=110 data-nosnippet>110</a></span><span class="attr">#[export]
-<a href=#111 id=111 data-nosnippet>111</a></span><span class="kw">fn </span>kapur_level_memory(array: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; i64 {
+<a href=#111 id=111 data-nosnippet>111</a></span><span class="kw">pub fn </span>kapur_level_memory(array: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; i64 {
 <a href=#112 id=112 data-nosnippet>112</a>    <span class="kw">match </span>to_luma(array) {
 <a href=#113 id=113 data-nosnippet>113</a>        <span class="prelude-val">Some</span>(luma) =&gt; imageproc::contrast::kapur_level(<span class="kw-2">&amp;</span>luma) <span class="kw">as </span>i64,
 <a href=#114 id=114 data-nosnippet>114</a>        <span class="prelude-val">None </span>=&gt; <span class="number">0</span>,
@@ -117,7 +117,7 @@
 <a href=#117 id=117 data-nosnippet>117</a>
 <a href=#118 id=118 data-nosnippet>118</a><span class="doccomment">/// Adjusts the luminance of an image to match the histogram of another image.
 <a href=#119 id=119 data-nosnippet>119</a></span><span class="attr">#[export]
-<a href=#120 id=120 data-nosnippet>120</a></span><span class="kw">fn </span>match_histogram_memory(array1: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;, array2: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; NumericArray&lt;u8&gt; {
+<a href=#120 id=120 data-nosnippet>120</a></span><span class="kw">pub fn </span>match_histogram_memory(array1: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;, array2: <span class="kw-2">&amp;</span>NumericArray&lt;u8&gt;) -&gt; NumericArray&lt;u8&gt; {
 <a href=#121 id=121 data-nosnippet>121</a>    <span class="kw">let </span>d1 = array1.dimensions();
 <a href=#122 id=122 data-nosnippet>122</a>    <span class="kw">let </span>d2 = array2.dimensions();
 <a href=#123 id=123 data-nosnippet>123</a>    <span class="kw">if </span>d1.len() &lt; <span class="number">2 </span>|| d2.len() &lt; <span class="number">2 </span>{

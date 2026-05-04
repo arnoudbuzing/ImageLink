@@ -29,7 +29,7 @@ fn to_luma(array: &NumericArray<u8>) -> Option<ImageBuffer<image::Luma<u8>, Vec<
 
 /// Returns the version string of the rust_vision crate.
 #[export]
-fn vision_get_version() -> String {
+pub fn vision_get_version() -> String {
     "0.1.0".to_string()
 }
 
@@ -42,7 +42,7 @@ fn vision_get_version() -> String {
 /// # Returns
 /// A NumericArray of shape [N, 2] containing {x, y} coordinates of detected corners.
 #[export]
-fn corners_fast9_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArray<i64> {
+pub fn corners_fast9_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArray<i64> {
     match to_luma(array) {
         Some(luma) => {
             let corners = imageproc::corners::corners_fast9(&luma, threshold as u8);
@@ -68,7 +68,7 @@ fn corners_fast9_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArra
 /// # Returns
 /// A 2D NumericArray (F64) representing the matching scores across the image.
 #[export]
-fn match_template_memory(array: &NumericArray<u8>, template_array: &NumericArray<u8>, method: i64) -> NumericArray<f64> {
+pub fn match_template_memory(array: &NumericArray<u8>, template_array: &NumericArray<u8>, method: i64) -> NumericArray<f64> {
     let luma1 = to_luma(array);
     let luma2 = to_luma(template_array);
     if let (Some(img), Some(tmpl)) = (luma1, luma2) {
@@ -104,7 +104,7 @@ fn match_template_memory(array: &NumericArray<u8>, template_array: &NumericArray
 /// # Returns
 /// A 2D NumericArray (U8) where each pixel value is the distance to the nearest background pixel.
 #[export]
-fn distance_transform_memory(array: &NumericArray<u8>, norm: i64) -> NumericArray<u8> {
+pub fn distance_transform_memory(array: &NumericArray<u8>, norm: i64) -> NumericArray<u8> {
     match to_luma(array) {
         Some(luma) => {
             let n = match norm {
@@ -123,7 +123,7 @@ fn distance_transform_memory(array: &NumericArray<u8>, norm: i64) -> NumericArra
 
 /// Computes Sobel gradients (magnitude) of an image.
 #[export]
-fn sobel_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
+pub fn sobel_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
     match to_luma(array) {
         Some(luma) => {
             let res = imageproc::gradients::sobel_gradients(&luma);
@@ -137,7 +137,7 @@ fn sobel_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
 
 /// Computes Prewitt gradients (magnitude) of an image.
 #[export]
-fn prewitt_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
+pub fn prewitt_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
     match to_luma(array) {
         Some(luma) => {
             let res = imageproc::gradients::prewitt_gradients(&luma);
@@ -150,7 +150,7 @@ fn prewitt_gradients_memory(array: &NumericArray<u8>) -> NumericArray<u16> {
 }
 
 #[export]
-fn horizontal_sobel_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+pub fn horizontal_sobel_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     match to_luma(array) {
         Some(luma) => {
             let res = imageproc::gradients::horizontal_sobel(&luma);
@@ -163,7 +163,7 @@ fn horizontal_sobel_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
 }
 
 #[export]
-fn vertical_sobel_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+pub fn vertical_sobel_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     match to_luma(array) {
         Some(luma) => {
             let res = imageproc::gradients::vertical_sobel(&luma);
@@ -176,7 +176,7 @@ fn vertical_sobel_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
 }
 
 #[export]
-fn horizontal_prewitt_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+pub fn horizontal_prewitt_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     match to_luma(array) {
         Some(luma) => {
             let res = imageproc::gradients::horizontal_prewitt(&luma);
@@ -189,7 +189,7 @@ fn horizontal_prewitt_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
 }
 
 #[export]
-fn vertical_prewitt_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+pub fn vertical_prewitt_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     match to_luma(array) {
         Some(luma) => {
             let res = imageproc::gradients::vertical_prewitt(&luma);
@@ -203,7 +203,7 @@ fn vertical_prewitt_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
 
 /// Computes the horizontal Scharr operator for an image.
 #[export]
-fn horizontal_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+pub fn horizontal_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     match to_luma(array) {
         Some(luma) => {
             let res = imageproc::gradients::horizontal_scharr(&luma);
@@ -217,7 +217,7 @@ fn horizontal_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
 
 /// Computes the vertical Scharr operator for an image.
 #[export]
-fn vertical_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
+pub fn vertical_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
     match to_luma(array) {
         Some(luma) => {
             let res = imageproc::gradients::vertical_scharr(&luma);
@@ -231,7 +231,7 @@ fn vertical_scharr_memory(array: &NumericArray<u8>) -> NumericArray<i16> {
 
 /// Detects corners using the FAST-12 algorithm.
 #[export]
-fn corners_fast12_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArray<i64> {
+pub fn corners_fast12_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArray<i64> {
     match to_luma(array) {
         Some(luma) => {
             let corners = imageproc::corners::corners_fast12(&luma, threshold as u8);
@@ -248,7 +248,7 @@ fn corners_fast12_memory(array: &NumericArray<u8>, threshold: i64) -> NumericArr
 
 /// Performs connected components labeling on a binary image.
 #[export]
-fn connected_components_memory(array: &NumericArray<u8>, connectivity: i64) -> NumericArray<u32> {
+pub fn connected_components_memory(array: &NumericArray<u8>, connectivity: i64) -> NumericArray<u32> {
     match to_luma(array) {
         Some(luma) => {
             let conn = if connectivity == 4 {
@@ -278,7 +278,7 @@ fn connected_components_memory(array: &NumericArray<u8>, connectivity: i64) -> N
 /// # Returns
 /// A 1D NumericArray (F32) containing the full HOG descriptor vector.
 #[export]
-fn hog_memory(array: &NumericArray<u8>, orientations: i64, signed: bool, cell_side: i64, block_side: i64, block_stride: i64) -> NumericArray<f32> {
+pub fn hog_memory(array: &NumericArray<u8>, orientations: i64, signed: bool, cell_side: i64, block_side: i64, block_stride: i64) -> NumericArray<f32> {
     match to_luma(array) {
         Some(luma) => {
             let options = imageproc::hog::HogOptions::new(
@@ -300,7 +300,7 @@ fn hog_memory(array: &NumericArray<u8>, orientations: i64, signed: bool, cell_si
 
 /// Evaluates all Haar features for a given frame size on an image.
 #[export]
-fn evaluate_haar_features_memory(array: &NumericArray<u8>, frame_width: i64, frame_height: i64) -> NumericArray<i32> {
+pub fn evaluate_haar_features_memory(array: &NumericArray<u8>, frame_width: i64, frame_height: i64) -> NumericArray<i32> {
     match to_luma(array) {
         Some(luma) => {
             if luma.width() < frame_width as u32 || luma.height() < frame_height as u32 {
@@ -320,7 +320,7 @@ fn evaluate_haar_features_memory(array: &NumericArray<u8>, frame_width: i64, fra
 
 /// Computes the Local Binary Pattern (LBP) image.
 #[export]
-fn local_binary_pattern_image_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
+pub fn local_binary_pattern_image_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
     match to_luma(array) {
         Some(luma) => {
             let (width, height) = luma.dimensions();
@@ -340,7 +340,7 @@ fn local_binary_pattern_image_memory(array: &NumericArray<u8>) -> NumericArray<u
 
 /// Performs non-maximum suppression on an image.
 #[export]
-fn suppress_non_maximum_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
+pub fn suppress_non_maximum_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
     match to_luma(array) {
         Some(luma) => {
             let res = imageproc::suppress::suppress_non_maximum(&luma, radius as u32);

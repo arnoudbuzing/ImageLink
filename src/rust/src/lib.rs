@@ -9,7 +9,7 @@ use image::imageops::FilterType;
 
 /// Returns the version string of the core ImageLink library.
 #[export]
-fn get_version() -> String {
+pub fn get_version() -> String {
     "0.1.0".to_string()
 }
 
@@ -17,7 +17,7 @@ fn get_version() -> String {
 /// 
 /// Supports filters: Nearest, Triangle, CatmullRom, Gaussian, Lanczos3.
 #[export]
-fn resize_image(input: String, output: String, width: i64, height: i64, filter_name: String) -> String {
+pub fn resize_image(input: String, output: String, width: i64, height: i64, filter_name: String) -> String {
     let img = match image::open(&input) {
         Ok(img) => img,
         Err(e) => return format!("Error opening input: {}", e),
@@ -42,7 +42,7 @@ fn resize_image(input: String, output: String, width: i64, height: i64, filter_n
 }
 /// Flips an image file horizontally or vertically.
 #[export]
-fn flip_image(input: String, output: String, direction: String) -> String {
+pub fn flip_image(input: String, output: String, direction: String) -> String {
     let img = match image::open(&input) {
         Ok(img) => img,
         Err(e) => return format!("Error opening input: {}", e),
@@ -62,7 +62,7 @@ fn flip_image(input: String, output: String, direction: String) -> String {
 
 /// Rotates an image file by 90, 180, or 270 degrees.
 #[export]
-fn rotate_image(input: String, output: String, angle: i64) -> String {
+pub fn rotate_image(input: String, output: String, angle: i64) -> String {
     let img = match image::open(&input) {
         Ok(img) => img,
         Err(e) => return format!("Error opening input: {}", e),
@@ -83,7 +83,7 @@ fn rotate_image(input: String, output: String, angle: i64) -> String {
 
 /// Crops an image file to the specified rectangle.
 #[export]
-fn crop_image(input: String, output: String, x: i64, y: i64, w: i64, h: i64) -> String {
+pub fn crop_image(input: String, output: String, x: i64, y: i64, w: i64, h: i64) -> String {
     let mut img = match image::open(&input) {
         Ok(img) => img,
         Err(e) => return format!("Error opening input: {}", e),
@@ -97,7 +97,7 @@ fn crop_image(input: String, output: String, x: i64, y: i64, w: i64, h: i64) -> 
     }
 }
 #[export]
-fn grayscale_image(input: String, output: String) -> String {
+pub fn grayscale_image(input: String, output: String) -> String {
     let img = match image::open(&input) {
         Ok(img) => img,
         Err(e) => return format!("Error opening input: {}", e),
@@ -112,7 +112,7 @@ fn grayscale_image(input: String, output: String) -> String {
 }
 
 #[export]
-fn invert_image(input: String, output: String) -> String {
+pub fn invert_image(input: String, output: String) -> String {
     let mut img = match image::open(&input) {
         Ok(img) => img,
         Err(e) => return format!("Error opening input: {}", e),
@@ -126,7 +126,7 @@ fn invert_image(input: String, output: String) -> String {
     }
 }
 #[export]
-fn blur_image(input: String, output: String, sigma: f64) -> String {
+pub fn blur_image(input: String, output: String, sigma: f64) -> String {
     let img = match image::open(&input) {
         Ok(img) => img,
         Err(e) => return format!("Error opening input: {}", e),
@@ -141,7 +141,7 @@ fn blur_image(input: String, output: String, sigma: f64) -> String {
 }
 
 #[export]
-fn unsharpen_image(input: String, output: String, sigma: f64, threshold: i64) -> String {
+pub fn unsharpen_image(input: String, output: String, sigma: f64, threshold: i64) -> String {
     let img = match image::open(&input) {
         Ok(img) => img,
         Err(e) => return format!("Error opening input: {}", e),
@@ -156,7 +156,7 @@ fn unsharpen_image(input: String, output: String, sigma: f64, threshold: i64) ->
 }
 /// Returns the width and height of an image file as a comma-separated string.
 #[export]
-fn image_dimensions(input: String) -> String {
+pub fn image_dimensions(input: String) -> String {
     match image::open(&input) {
         Ok(img) => format!("{},{}", img.width(), img.height()),
         Err(e) => format!("Error: {}", e),
@@ -165,7 +165,7 @@ fn image_dimensions(input: String) -> String {
 
 /// Returns the color type of an image file.
 #[export]
-fn image_color_type(input: String) -> String {
+pub fn image_color_type(input: String) -> String {
     match image::open(&input) {
         Ok(img) => format!("{:?}", img.color()),
         Err(e) => format!("Error: {}", e),
@@ -177,7 +177,7 @@ use image::{ImageBuffer, Rgb, Rgba};
 
 /// Blurs an image stored in memory using a Gaussian filter.
 #[export]
-fn blur_memory(array: &NumericArray<u8>, sigma: f64) -> NumericArray<u8> {
+pub fn blur_memory(array: &NumericArray<u8>, sigma: f64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -203,7 +203,7 @@ fn blur_memory(array: &NumericArray<u8>, sigma: f64) -> NumericArray<u8> {
 
 /// Inverts the colors of an image stored in memory.
 #[export]
-fn invert_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
+pub fn invert_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -228,7 +228,7 @@ fn invert_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
 }
 
 #[export]
-fn unsharpen_memory(array: &NumericArray<u8>, sigma: f64, threshold: i64) -> NumericArray<u8> {
+pub fn unsharpen_memory(array: &NumericArray<u8>, sigma: f64, threshold: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -253,7 +253,7 @@ fn unsharpen_memory(array: &NumericArray<u8>, sigma: f64, threshold: i64) -> Num
 }
 
 #[export]
-fn flip_memory(array: &NumericArray<u8>, direction: String) -> NumericArray<u8> {
+pub fn flip_memory(array: &NumericArray<u8>, direction: String) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -285,7 +285,7 @@ fn flip_memory(array: &NumericArray<u8>, direction: String) -> NumericArray<u8> 
     }
 }
 #[export]
-fn rotate_memory(array: &NumericArray<u8>, angle: i64) -> NumericArray<u8> {
+pub fn rotate_memory(array: &NumericArray<u8>, angle: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -321,7 +321,7 @@ fn rotate_memory(array: &NumericArray<u8>, angle: i64) -> NumericArray<u8> {
 
 /// Converts a memory-based image to grayscale.
 #[export]
-fn grayscale_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
+pub fn grayscale_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -345,7 +345,7 @@ fn grayscale_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
     }
 }
 #[export]
-fn crop_memory(array: &NumericArray<u8>, x: i64, y: i64, target_w: i64, target_h: i64) -> NumericArray<u8> {
+pub fn crop_memory(array: &NumericArray<u8>, x: i64, y: i64, target_w: i64, target_h: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -371,7 +371,7 @@ fn crop_memory(array: &NumericArray<u8>, x: i64, y: i64, target_w: i64, target_h
 
 /// Resizes a memory-based image.
 #[export]
-fn resize_memory(array: &NumericArray<u8>, target_w: i64, target_h: i64, filter_name: String) -> NumericArray<u8> {
+pub fn resize_memory(array: &NumericArray<u8>, target_w: i64, target_h: i64, filter_name: String) -> NumericArray<u8> {
     let filter = match filter_name.as_str() {
         "Nearest" => FilterType::Nearest,
         "Triangle" => FilterType::Triangle,
@@ -405,7 +405,7 @@ fn resize_memory(array: &NumericArray<u8>, target_w: i64, target_h: i64, filter_
 }
 /// Detects edges in a memory-based image using the Canny algorithm.
 #[export]
-fn canny_memory(array: &NumericArray<u8>, low: f64, high: f64) -> NumericArray<u8> {
+pub fn canny_memory(array: &NumericArray<u8>, low: f64, high: f64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -431,7 +431,7 @@ fn canny_memory(array: &NumericArray<u8>, low: f64, high: f64) -> NumericArray<u
 }
 /// Performs morphological dilation on a memory-based image.
 #[export]
-fn dilate_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
+pub fn dilate_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -476,7 +476,7 @@ fn dilate_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
 
 /// Performs morphological erosion on a memory-based image.
 #[export]
-fn erode_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
+pub fn erode_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -520,7 +520,7 @@ fn erode_memory(array: &NumericArray<u8>, radius: i64) -> NumericArray<u8> {
 }
 
 #[export]
-fn median_memory(array: &NumericArray<u8>, x_radius: i64, y_radius: i64) -> NumericArray<u8> {
+pub fn median_memory(array: &NumericArray<u8>, x_radius: i64, y_radius: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -547,7 +547,7 @@ fn median_memory(array: &NumericArray<u8>, x_radius: i64, y_radius: i64) -> Nume
 }
 
 #[export]
-fn filter3x3_memory(array: &NumericArray<u8>, kernel_array: &NumericArray<f64>) -> NumericArray<u8> {
+pub fn filter3x3_memory(array: &NumericArray<u8>, kernel_array: &NumericArray<f64>) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -580,7 +580,7 @@ fn filter3x3_memory(array: &NumericArray<u8>, kernel_array: &NumericArray<f64>) 
 }
 
 #[export]
-fn equalize_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
+pub fn equalize_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -622,7 +622,7 @@ fn equalize_memory(array: &NumericArray<u8>) -> NumericArray<u8> {
 }
 
 #[export]
-fn adaptive_threshold_memory(array: &NumericArray<u8>, block_radius: i64, delta: i64) -> NumericArray<u8> {
+pub fn adaptive_threshold_memory(array: &NumericArray<u8>, block_radius: i64, delta: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
@@ -649,7 +649,7 @@ fn adaptive_threshold_memory(array: &NumericArray<u8>, block_radius: i64, delta:
 
 /// Performs content-aware image resizing (seam carving) by shrinking width.
 #[export]
-fn shrink_width_memory(array: &NumericArray<u8>, target_width: i64) -> NumericArray<u8> {
+pub fn shrink_width_memory(array: &NumericArray<u8>, target_width: i64) -> NumericArray<u8> {
     let dims = array.dimensions();
     if dims.len() < 3 {
         return NumericArray::<u8>::from_slice(array.as_slice());
